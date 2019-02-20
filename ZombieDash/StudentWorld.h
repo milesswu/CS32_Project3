@@ -18,9 +18,11 @@ public:
 	virtual int move();
 	virtual void cleanUp();
 
-	bool	checkForCollisions(double x, double y);
+	bool	checkForCollisions(int dir, double x, double y);
+	bool	checkForOverlap(double x, double y);
 
 private:
+	const int			COLLISION_DISTANCE = 100;
 	Penelope*			m_penelope;
 	std::list<Actor*>	m_actors;
 	int					m_alive;

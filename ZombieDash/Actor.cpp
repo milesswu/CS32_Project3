@@ -30,9 +30,11 @@ Player::~Player()
 //Helper function to set new direction and location when a Player object moves
 void Player::move(Direction dir, double x, double y)
 {
-	if (getWorld()->checkForCollisions(x, y))
-		return;
 	setDirection(dir);
+	cerr << "Penelope (x, y): (" << getX() << ", " << getY() << ")" << endl;
+	cerr << "Penelope max(?) (x, y): (" << getX() + SPRITE_WIDTH - 1 << ", " << getY() + SPRITE_HEIGHT - 1 << ")" << endl;
+	if (getWorld()->checkForCollisions(dir, getX(), getY()))
+		return;
 	moveTo(x, y);
 }
 

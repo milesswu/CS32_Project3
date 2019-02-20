@@ -141,13 +141,68 @@ void StudentWorld::cleanUp()
 	}
 }
 
-bool StudentWorld::checkForCollisions(double x, double y)
+bool StudentWorld::checkForCollisions(int dir, double x, double y)
 {
 	list<Actor*>::iterator it;
 	it = m_actors.begin();
 	while (it != m_actors.end())
 	{
-		if ((*it)->getX() == x && (*it)->getY() == y)
+		double actorX = (*it)->getX();
+		double actorY = (*it)->getY();	
+		switch (dir) {
+		case 0: //right
+			if (x + SPRITE_WIDTH >= actorX && x + SPRITE_WIDTH <= actorX + SPRITE_WIDTH - 1 && y <= actorY + SPRITE_HEIGHT - 1 && y + SPRITE_HEIGHT >= actorY) {
+				cerr << "Actor (x, y): (" << actorX << ", " << actorY << ")" << endl;
+				cerr << "Actor max (x, y): (" << actorX + SPRITE_WIDTH << ", " << actorY + SPRITE_HEIGHT << ")" << endl;
+				if (y + SPRITE_HEIGHT <= actorY || y >= actorY + SPRITE_HEIGHT)
+					return false;
+				return true;
+			}
+			break;
+		case 90: //up
+			if (y + SPRITE_HEIGHT >= actorY && y + SPRITE_HEIGHT <= actorY + SPRITE_HEIGHT - 1 && x <= actorX + SPRITE_WIDTH - 1 && x + SPRITE_WIDTH >= actorX) {
+				cerr << "Actor (x, y): (" << actorX << ", " << actorY << ")" << endl;
+				cerr << "Actor max (x, y): (" << actorX + SPRITE_WIDTH << ", " << actorY + SPRITE_HEIGHT << ")" << endl;
+				if (x + SPRITE_WIDTH <= actorX || x >= actorX + SPRITE_WIDTH)
+					return false;
+				return true;
+			}
+			break;
+		case 180: //left
+			if (x <= actorX + SPRITE_WIDTH && x >= actorX && y <= actorY + SPRITE_HEIGHT - 1 && y + SPRITE_HEIGHT >= actorY) {
+				cerr << "Actor (x, y): (" << actorX << ", " << actorY << ")" << endl;
+				cerr << "Actor max (x, y): (" << actorX + SPRITE_WIDTH << ", " << actorY + SPRITE_HEIGHT << ")" << endl;
+				if (y + SPRITE_HEIGHT <= actorY || y >= actorY + SPRITE_HEIGHT)
+					return false;
+				return true;
+			}
+			break;
+		case 270: //down
+			if (y <= actorY + SPRITE_HEIGHT && y >= actorY && x <= actorX + SPRITE_WIDTH - 1 && x + SPRITE_WIDTH >= actorX) {
+				cerr << "Actor (x, y): (" << actorX << ", " << actorY << ")" << endl;
+				cerr << "Actor max (x, y): (" << actorX + SPRITE_WIDTH << ", " << actorY + SPRITE_HEIGHT << ")" << endl;
+				if (x + SPRITE_WIDTH <= actorX || x >= actorX + SPRITE_WIDTH)
+					return false;
+				return true;
+			}
+			break;
+		default:
+			break;
+		}
+		it++;
+	}
+	return false;
+}
+
+bool StudentWorld::checkForOverlap(double x, double y)
+{
+	list<Actor*>::iterator it;
+	it = m_actors.begin();
+	while (it != m_actors.end())
+	{
+		double hDist = ((*it)->getX() - x) * ((*it)->getX() - x);
+		double vDist = ((*it)->getY() == y) * ((*it)->getY() == y);
+		if ((hDist + vDist) <= COLLISION_DISTANCE)
 			return true;
 		it++;
 	}
