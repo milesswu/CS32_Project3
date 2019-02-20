@@ -15,8 +15,11 @@ GameWorld* createStudentWorld(string assetPath)
 // Students:  Add code to this file, StudentWorld.h, Actor.h and Actor.cpp
 
 StudentWorld::StudentWorld(string assetPath)
-	: GameWorld(assetPath), m_penelope(nullptr), m_alive(0), m_victory(false)
+	: GameWorld(assetPath)
 {
+	m_penelope = nullptr;
+	m_alive = 0;
+	m_victory = false;
 }
 
 StudentWorld::~StudentWorld()
@@ -44,7 +47,7 @@ int StudentWorld::init()
 	for (int i = 0; i < LEVEL_HEIGHT; i++) {
 		for (int j = 0; j < LEVEL_WIDTH; j++) {
 			Level::MazeEntry entry = lev.getContentsOf(i, j);
-			cerr << "Testing: " << entry << endl;
+			//cerr << "Testing: " << entry << endl;
 			switch (entry) {
 			case Level::empty:
 			{
@@ -74,10 +77,9 @@ int StudentWorld::init()
 			}
 			case Level::wall:
 			{
-				//cerr << "Making a wall" << endl;
-				//Wall* getWalled = new Wall(this, i * SPRITE_WIDTH, j * SPRITE_HEIGHT);
-				//m_actors.push_back(getWalled);
-				//cerr << "x: " << m_actors.back()->getX() << ", y: " << m_actors.back()->getY() << endl;
+				cerr << "Creating a wall" << endl;
+				Wall* getWalled = new Wall(this, i * SPRITE_WIDTH, j * SPRITE_HEIGHT);
+				m_actors.push_back(getWalled);
 				break;
 			}
 			case Level::pit:
@@ -119,6 +121,7 @@ int StudentWorld::move()
 			decLives();
 			return GWSTATUS_PLAYER_DIED;
 		}
+		it++;
 	}
 	checkDead();
 	return GWSTATUS_CONTINUE_GAME;
@@ -134,6 +137,7 @@ void StudentWorld::cleanUp()
 		delete (*del);
 		(*del) = nullptr;
 		del = m_actors.erase(del);
+		del++;
 	}
 }
 
