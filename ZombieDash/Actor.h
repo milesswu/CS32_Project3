@@ -8,7 +8,11 @@ class StudentWorld;
 class Actor : public GraphObject
 {
 public:
-	Actor(StudentWorld* world, int imageID, double startX, double startY, Direction dir = right, int depth = 0) : GraphObject(imageID, startX, startY, dir, depth) {}
+	Actor(StudentWorld* world, int imageID, double startX, double startY, Direction dir = right, int depth = 0) : GraphObject(imageID, startX, startY, dir, depth) 
+	{
+		m_world = world;
+		m_isDead = false;
+	}
 	virtual ~Actor();
 
 	virtual void	doSomething() = 0;
@@ -52,7 +56,11 @@ private:
 class InfectablePlayer : public Player
 {
 public:
-	InfectablePlayer(StudentWorld* world, int imageID, double startX, double startY) : Player(world, imageID, startX, startY) {}
+	InfectablePlayer(StudentWorld* world, int imageID, double startX, double startY) : Player(world, imageID, startX, startY) 
+	{
+		m_isInfected = false;
+		m_infectionCount = 0;
+	}
 	virtual ~InfectablePlayer();
 
 	bool isInfected()
@@ -80,7 +88,12 @@ private:
 class Penelope : public InfectablePlayer
 {
 public:
-	Penelope(StudentWorld* world, double startX, double startY) : InfectablePlayer(world, IID_PLAYER, startX, startY) {}
+	Penelope(StudentWorld* world, double startX, double startY) : InfectablePlayer(world, IID_PLAYER, startX, startY) 
+	{
+		m_vaccineCount = 0;
+		m_gasCount = 0;
+		m_landmineCount = 0;
+	}
 	virtual ~Penelope();
 
 	virtual void	doSomething();
@@ -147,7 +160,7 @@ public:
 class Wall : public Environment
 {
 public:
-	Wall(StudentWorld* world, int imageID, double startX, double startY) : Environment(world, IID_WALL, startX, startY) {}
+	Wall(StudentWorld* world, double startX, double startY) : Environment(world, IID_WALL, startX, startY) {}
 	virtual ~Wall();
 
 	virtual void doSomething() { return; }

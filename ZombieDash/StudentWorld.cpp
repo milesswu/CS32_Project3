@@ -1,6 +1,7 @@
 #include "StudentWorld.h"
 #include "GameConstants.h"
 #include "Level.h"
+#include "Actor.h"
 #include <sstream>
 #include <iomanip>
 #include <string>
@@ -73,10 +74,10 @@ int StudentWorld::init()
 			}
 			case Level::wall:
 			{
-				cerr << "Making a wall" << endl;
-				Wall* getWalled = new Wall(this, i * SPRITE_WIDTH, j * SPRITE_HEIGHT);
-				m_actors.push_back(getWalled);
-				cerr << "x: " << m_actors.back()->getX() << ", y: " << m_actors.back()->getY() << endl;
+				//cerr << "Making a wall" << endl;
+				//Wall* getWalled = new Wall(this, i * SPRITE_WIDTH, j * SPRITE_HEIGHT);
+				//m_actors.push_back(getWalled);
+				//cerr << "x: " << m_actors.back()->getX() << ", y: " << m_actors.back()->getY() << endl;
 				break;
 			}
 			case Level::pit:
