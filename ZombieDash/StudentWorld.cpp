@@ -141,6 +141,18 @@ void StudentWorld::cleanUp()
 	}
 }
 
+bool StudentWorld::checkForCollisions(double x, double y)
+{
+	list<Actor*>::iterator it;
+	it = m_actors.begin();
+	while (it != m_actors.end())
+	{
+		if ((*it)->getX() == x && (*it)->getY() == y)
+			return true;
+	}
+	return false;
+}
+
 //checks each actor to see if it  died during the current tick, if so delete it and erase from the list of current actors
 void StudentWorld::checkDead() {
 	list<Actor*>::iterator it;

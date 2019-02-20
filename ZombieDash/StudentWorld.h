@@ -18,6 +18,8 @@ public:
 	virtual int move();
 	virtual void cleanUp();
 
+	bool	checkForCollisions(double x, double y);
+
 private:
 	Penelope*			m_penelope;
 	std::list<Actor*>	m_actors;
