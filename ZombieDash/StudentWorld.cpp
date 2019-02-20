@@ -147,6 +147,10 @@ bool StudentWorld::checkForCollisions(int dir, double x, double y)
 	it = m_actors.begin();
 	while (it != m_actors.end())
 	{
+		if (!((*it)->hasCollision())) {
+			it++;
+			continue;
+		}
 		double actorX = (*it)->getX();
 		double actorY = (*it)->getY();	
 		switch (dir) {

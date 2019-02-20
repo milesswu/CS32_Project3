@@ -16,6 +16,8 @@ public:
 	virtual ~Actor();
 
 	virtual void	doSomething() = 0;
+	virtual bool	hasCollision() = 0;
+
 	StudentWorld* getWorld() const
 	{
 		return m_world;
@@ -47,6 +49,11 @@ class Player : public Actor
 public:
 	Player(StudentWorld* world, int imageID, double startX, double startY) : Actor(world, imageID, startX, startY) {}
 	virtual ~Player();
+
+	virtual bool hasCollision()
+	{
+		return true;
+	}
 
 	void	move(Direction dir, double x, double y);
 private:
@@ -164,6 +171,10 @@ public:
 	virtual ~Wall();
 
 	virtual void doSomething() { return; }
+	virtual bool hasCollision()
+	{
+		return true;
+	}
 };
 
 /*
