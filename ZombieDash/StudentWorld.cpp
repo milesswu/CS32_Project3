@@ -149,6 +149,7 @@ bool StudentWorld::checkForCollisions(double x, double y)
 	{
 		if ((*it)->getX() == x && (*it)->getY() == y)
 			return true;
+		it++;
 	}
 	return false;
 }
