@@ -30,6 +30,8 @@ Player::~Player()
 //Helper function to set new direction and location when a Player object moves
 void Player::move(Direction dir, double x, double y)
 {
+	if (getWorld()->checkForCollisions(x, y))
+		return;
 	setDirection(dir);
 	moveTo(x, y);
 }
