@@ -112,6 +112,10 @@ int StudentWorld::move()
 	// Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
 	if (!m_penelope->isDead()) {
 		m_penelope->doSomething();
+		if (m_penelope->isDead()) {
+			decLives();
+			return GWSTATUS_PLAYER_DIED;
+		}
 	}
 	list<Actor*>::iterator it;
 	it = m_actors.begin();

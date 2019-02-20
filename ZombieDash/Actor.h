@@ -75,6 +75,11 @@ public:
 		return m_isInfected;
 	}
 
+	bool getInfected()
+	{
+		return m_infectionCount == INFECT_LEVEL;
+	}
+
 	int incInfection()
 	{
 		m_infectionCount++;
@@ -87,8 +92,9 @@ public:
 	}
 
 private:
-	bool	m_isInfected;
-	int		m_infectionCount;
+	const int	INFECT_LEVEL = 500;
+	bool		m_isInfected;
+	int			m_infectionCount;
 
 };
 

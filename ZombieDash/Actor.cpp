@@ -62,7 +62,7 @@ void Penelope::doSomething()
 	if (isDead())
 		return;
 	if (isInfected()) {
-		if (incInfection() == 500) {
+		if (getInfected()) {
 			setDead();
 			return;
 		}
