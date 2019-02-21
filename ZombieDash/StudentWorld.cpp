@@ -113,7 +113,15 @@ int StudentWorld::move()
 {
 	ostringstream oss;
 	oss.fill('0');
-	oss << "Score:  " << setw(6) << getScore() << "  Level:  " << getLevel() << "  Lives:  " << getLives() /*<< "  Vacc:   " << m_penelope->getVaccines() << "  Flames : 19 Mines : 3 Infected : 0" */<< endl;
+	oss << "Score:  " << setw(6) << getScore();
+	oss.fill(' ');
+	oss << "  Level:" << setw(3) << getLevel() << "  Lives:"
+		<< setw(3) << getLives()
+		<< "  Vacc:" << setw(3) << m_penelope->getVaccines()
+		<< "  Flames:" << setw(3) << m_penelope->getGas()
+		<< "  Mines:" << setw(3) << m_penelope->getLandmines()
+		<< "  Infected:" << setw(3) << m_penelope->infectionCount()
+		<< endl;
 	setGameStatText(oss.str());
 	if (!m_penelope->isDead()) {
 		m_penelope->doSomething();

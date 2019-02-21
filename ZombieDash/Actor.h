@@ -106,9 +106,9 @@ public:
 		return false;
 	}
 
-	bool getInfected()
+	int infectionCount()
 	{
-		return m_infectionCount == INFECT_LEVEL;
+		return m_infectionCount;
 	}
 
 	int incInfection()
@@ -141,6 +141,21 @@ public:
 	virtual ~Penelope();
 
 	virtual void	doSomething();
+
+	int getVaccines()
+	{
+		return m_vaccineCount;
+	}
+
+	int getGas()
+	{
+		return m_gasCount;
+	}
+
+	int getLandmines()
+	{
+		return m_landmineCount;
+	}
 
 private:
 	int	m_vaccineCount;
