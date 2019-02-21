@@ -17,6 +17,10 @@ public:
 
 	virtual void	doSomething() = 0;
 	virtual bool	hasCollision() = 0;
+	virtual bool isInfectable()
+	{
+		return false;
+	}
 
 	StudentWorld* getWorld() const
 	{
@@ -69,6 +73,11 @@ public:
 		m_infectionCount = 0;
 	}
 	virtual ~InfectablePlayer();
+
+	virtual bool isInfectable()
+	{
+		return true;
+	}
 
 	bool isInfected()
 	{
@@ -196,17 +205,21 @@ public:
 	}
 };
 
-/*
 class Exit : public Environment
 {
 public:
-	Exit(StudentWorld* world, double startX, double startY) : Environment(world, IID_EXIT, startX, startY, right, 0) {}
+	Exit(StudentWorld* world, double startX, double startY) : Environment(world, IID_EXIT, startX, startY, right, 1) {}
 	virtual ~Exit();
 
 	virtual void doSomething();
+	virtual bool hasCollision()
+	{
+		return false;
+	}
 
 };
 
+/*
 class Hazard : public Environment
 {
 public:
