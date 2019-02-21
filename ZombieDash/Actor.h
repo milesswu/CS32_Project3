@@ -228,7 +228,7 @@ public:
 
 };
 
-/*
+
 class Hazard : public Environment
 {
 public:
@@ -239,6 +239,7 @@ public:
 
 };
 
+
 class Pit : public Hazard
 {
 public:
@@ -248,7 +249,7 @@ public:
 	virtual void doSomething();
 
 };
-
+/*
 class Landmine : public Hazard
 {
 	Landmine(StudentWorld* world, double startX, double startY) : Hazard(world, IID_LANDMINE ,startX, startY) {}
