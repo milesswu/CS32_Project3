@@ -249,9 +249,10 @@ class Hazard : public Environment
 public:
 	Hazard(StudentWorld* world, int imageID, double startX, double startY) : Environment(world, imageID, startX, startY, right, 1) {}
 	virtual ~Hazard();
-
-	virtual void doSomething();
-
+	virtual bool hasCollision()
+	{
+		return false;
+	}
 };
 
 

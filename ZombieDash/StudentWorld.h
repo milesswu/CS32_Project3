@@ -22,6 +22,8 @@ public:
 	bool	checkForCollisions(int dir, double x, double y);
 	void	overlapWithExit(double x, double y);
 	void	escape(std::list<Actor*>::iterator& del);
+	void	overlapWithHazard(double x, double y);
+	void	killActor(std::list<Actor*>::iterator& del);
 	//void	createZombie(double x, double y);
 
 private:

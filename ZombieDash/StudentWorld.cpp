@@ -87,6 +87,9 @@ int StudentWorld::init()
 			}
 			case Level::pit:
 			{
+				cerr << "Creating a Pit" << endl;
+				Actor* pit = new Pit(this, i * SPRITE_WIDTH, j * SPRITE_HEIGHT);
+				m_actors.push_back(pit);
 				break;
 			}
 			case Level::vaccine_goodie:
@@ -125,10 +128,10 @@ int StudentWorld::move()
 	setGameStatText(oss.str());
 	if (!m_penelope->isDead()) {
 		m_penelope->doSomething();
-		if (m_penelope->isDead()) {
-			decLives();
-			return GWSTATUS_PLAYER_DIED;
-		}
+	}
+	if (m_penelope->isDead()) {
+		decLives();
+		return GWSTATUS_PLAYER_DIED;
 	}
 	list<Actor*>::iterator it;
 	it = m_actors.begin();
@@ -253,6 +256,38 @@ void StudentWorld::overlapWithExit(double x, double y)
 	}
 }
 
+void StudentWorld::killActor(list<Actor*>::iterator& del)
+{
+	if ((*del)->isInfectable())
+		m_alive--;
+	delete (*del);
+	del = m_actors.erase(del);
+}
+
+void StudentWorld::overlapWithHazard(double x, double y)
+{
+	list<Actor*>::iterator it = m_actors.begin();
+	double hDist = 0;
+	double vDist = 0;
+	while (it != m_actors.end())
+	{
+		if (!(*it)->isDamageable()) {
+			it++;
+			continue;
+		}
+		hDist = ((*it)->getX() - x) * ((*it)->getX() - x);
+		vDist = ((*it)->getY() - y) * ((*it)->getY() - y);
+		if (vDist + hDist <= OVERLAP_DISTANCE) {
+			killActor(it);
+		}
+		it++;
+	}
+	hDist = (m_penelope->getX() - x) * (m_penelope->getX() - x);
+	vDist = (m_penelope->getY() - y) * (m_penelope->getY() - y);
+	if (vDist + hDist <= OVERLAP_DISTANCE && m_alive == 0) {
+		m_penelope->setDead();
+	}
+}
 /*
 void StudentWorld::createZombie(double x, double y)
 {
