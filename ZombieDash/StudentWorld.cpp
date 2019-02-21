@@ -241,7 +241,6 @@ void StudentWorld::overlapWithExit(double x, double y)
 	hDist = (m_penelope->getX() - x) * (m_penelope->getX() - x);
 	vDist = (m_penelope->getY() - y) * (m_penelope->getY() - y);
 	if (vDist + hDist <= OVERLAP_DISTANCE && m_alive == 0) {
-		increaseScore(1000);
 		m_victory = true;
 	}
 }
