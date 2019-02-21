@@ -146,9 +146,8 @@ Exit::~Exit()
 
 void Exit::doSomething()
 {
-	//if (getWorld()->checkForOverlap()) {
-		//getWorld()->increaseScore(500);
-	//}
+	getWorld()->overlapWithExit(getX(), getY());
+	return;
 }
 
 /**********************************************************************************************************************************************************
