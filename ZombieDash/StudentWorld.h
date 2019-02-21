@@ -20,6 +20,7 @@ public:
 
 	bool	checkForCollisions(int dir, double x, double y);
 	bool	checkForOverlap(double x, double y);
+	void	createZombie(double x, double y);
 
 private:
 	const int			COLLISION_DISTANCE = 100;

@@ -75,6 +75,19 @@ public:
 		return m_isInfected;
 	}
 
+	bool infect()
+	{
+		if (isInfected()) {
+			m_infectionCount++;
+			if (m_infectionCount == INFECT_LEVEL) {
+				setDead();
+				return true;
+			}
+			return false;
+		}
+		return false;
+	}
+
 	bool getInfected()
 	{
 		return m_infectionCount == INFECT_LEVEL;

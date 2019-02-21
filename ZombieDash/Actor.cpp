@@ -61,12 +61,8 @@ void Penelope::doSomething()
 {
 	if (isDead())
 		return;
-	if (isInfected()) {
-		if (getInfected()) {
-			setDead();
-			return;
-		}
-	}
+	if (infect())
+		return;
 	int keyPress;
 	if (getWorld()->getKey(keyPress)) {
 		switch (keyPress) {

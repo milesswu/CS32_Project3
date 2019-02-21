@@ -114,6 +114,8 @@ int StudentWorld::move()
 		m_penelope->doSomething();
 		if (m_penelope->isDead()) {
 			decLives();
+			if (m_penelope->isInfected())
+				createZombie(m_penelope->getDirection(), m_penelope->getX(), m_penelope->getY());
 			return GWSTATUS_PLAYER_DIED;
 		}
 	}
@@ -217,7 +219,15 @@ bool StudentWorld::checkForOverlap(double x, double y)
 	return false;
 }
 
-//checks each actor to see if it  died during the current tick, if so delete it and erase from the list of current actors
+/*
+void StudentWorld::createZombie(double x, double y)
+{
+	Actor* zombie = new Zombie(this, x, y);
+	m_actors.push_back(zombie);
+}
+*/
+
+//checks each actor to see if any actors died during the current tick, if so delete them and erase from the list of current actors
 void StudentWorld::checkDead() {
 	list<Actor*>::iterator it;
 	it = m_actors.begin();
