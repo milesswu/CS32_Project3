@@ -114,8 +114,6 @@ int StudentWorld::move()
 		m_penelope->doSomething();
 		if (m_penelope->isDead()) {
 			decLives();
-			if (m_penelope->isInfected())
-				createZombie(m_penelope->getDirection(), m_penelope->getX(), m_penelope->getY());
 			return GWSTATUS_PLAYER_DIED;
 		}
 	}
