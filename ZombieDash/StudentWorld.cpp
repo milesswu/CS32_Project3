@@ -69,18 +69,20 @@ int StudentWorld::init()
 			}
 			case Level::citizen:
 			{
-				m_alive++;
+				//m_alive++;
 			}
 			case Level::exit:
 			{
 				cerr << "Creating an Exit" << endl;
+				Actor* exit = new Exit(this, i * SPRITE_WIDTH, j * SPRITE_HEIGHT);
+				m_actors.push_back(exit);
 				break;
 			}
 			case Level::wall:
 			{
 				cerr << "Creating a Wall" << endl;
-				Wall* getWalled = new Wall(this, i * SPRITE_WIDTH, j * SPRITE_HEIGHT);
-				m_actors.push_back(getWalled);
+				Actor* wall = new Wall(this, i * SPRITE_WIDTH, j * SPRITE_HEIGHT);
+				m_actors.push_back(wall);
 				break;
 			}
 			case Level::pit:
@@ -109,6 +111,10 @@ int StudentWorld::init()
 
 int StudentWorld::move()
 {
+	ostringstream oss;
+	oss.fill('0');
+	oss << "Score:  " << setw(6) << getScore() << "  Level:  " << getLevel() << "  Lives:  " << getLives() /*<< "  Vacc:   " << m_penelope->getVaccines() << "  Flames : 19 Mines : 3 Infected : 0" */<< endl;
+	setGameStatText(oss.str());
 	if (!m_penelope->isDead()) {
 		m_penelope->doSomething();
 		if (m_penelope->isDead()) {
@@ -119,12 +125,16 @@ int StudentWorld::move()
 	list<Actor*>::iterator it;
 	it = m_actors.begin();
 	while (it != m_actors.end()) {
+		if ((*it)->isDead()) {
+			it++;
+			continue;
+		}
 		(*it)->doSomething();
 		if (m_penelope->isDead()) {
 			decLives();
 			return GWSTATUS_PLAYER_DIED;
 		}
-		if (m_victory) {
+		if (m_victory == true) {
 			m_victory = false;
 			return GWSTATUS_FINISHED_LEVEL;
 		}
@@ -144,7 +154,6 @@ void StudentWorld::cleanUp()
 		delete (*del);
 		(*del) = nullptr;
 		del = m_actors.erase(del);
-		del++;
 	}
 }
 
@@ -220,8 +229,8 @@ void StudentWorld::overlapWithExit(double x, double y)
 	while (it != m_actors.end())
 	{
 		if ((*it)->isInfectable()) {
-			hDist = ((*it)->getX()) * ((*it)->getX());
-			vDist = ((*it)->getY()) * ((*it)->getY());
+			hDist = ((*it)->getX() - x) * ((*it)->getX() - x);
+			vDist = ((*it)->getY() - y) * ((*it)->getY() - y);
 			if (vDist + hDist <= OVERLAP_DISTANCE) {
 				escape(it);
 				continue;
@@ -229,10 +238,10 @@ void StudentWorld::overlapWithExit(double x, double y)
 		}
 		it++;
 	}
-	hDist = (m_penelope->getX()) * (m_penelope->getX());
-	vDist = (m_penelope->getY()) * (m_penelope->getY());
+	hDist = (m_penelope->getX() - x) * (m_penelope->getX() - x);
+	vDist = (m_penelope->getY() - y) * (m_penelope->getY() - y);
 	if (vDist + hDist <= OVERLAP_DISTANCE && m_alive == 0) {
-		m_victory == true;
+		m_victory = true;
 	}
 }
 
