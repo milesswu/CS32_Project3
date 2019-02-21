@@ -31,8 +31,8 @@ Player::~Player()
 void Player::move(Direction dir, double x, double y)
 {
 	setDirection(dir);
-	cerr << "Penelope (x, y): (" << getX() << ", " << getY() << ")" << endl;
-	cerr << "Penelope max(?) (x, y): (" << getX() + SPRITE_WIDTH - 1 << ", " << getY() + SPRITE_HEIGHT - 1 << ")" << endl;
+	//cerr << "Penelope (x, y): (" << getX() << ", " << getY() << ")" << endl;
+	//cerr << "Penelope max(?) (x, y): (" << getX() + SPRITE_WIDTH - 1 << ", " << getY() + SPRITE_HEIGHT - 1 << ")" << endl;
 	if (getWorld()->checkForCollisions(dir, getX(), getY()))
 		return;
 	moveTo(x, y);
@@ -144,9 +144,11 @@ Exit::~Exit()
 	cerr << "Destroying an Exit" << endl;
 }
 
-virtual void Exit::doSomething()
+void Exit::doSomething()
 {
-	
+	//if (getWorld()->checkForOverlap()) {
+		//getWorld()->increaseScore(500);
+	//}
 }
 
 /**********************************************************************************************************************************************************

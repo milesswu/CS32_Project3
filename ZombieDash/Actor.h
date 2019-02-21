@@ -22,6 +22,11 @@ public:
 		return false;
 	}
 
+	virtual bool isDamageable()
+	{
+		return false;
+	}
+
 	StudentWorld* getWorld() const
 	{
 		return m_world;
@@ -55,6 +60,11 @@ public:
 	virtual ~Player();
 
 	virtual bool hasCollision()
+	{
+		return true;
+	}
+
+	virtual bool isDamageable()
 	{
 		return true;
 	}
@@ -245,6 +255,10 @@ class Landmine : public Hazard
 	Landmine(StudentWorld* world, double startX, double startY) : Hazard(world, IID_LANDMINE ,startX, startY) {}
 	virtual ~Landmine();
 
+	virtual bool isDamageable() 
+	{
+		return true;
+	}
 	virtual void doSomething();
 
 };
@@ -261,6 +275,10 @@ public:
 	Goodie(StudentWorld* world, int imageID, double startX, double startY) : Actor(world, imageID, startX, startY, 0, 1) {}
 	virtual ~Goodie();
 
+	virtual bool isDamageable()
+	{
+		return true;
+	}
 	virtual void doSomething();
 
 };
