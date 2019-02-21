@@ -4,6 +4,7 @@
 #include "GameWorld.h"
 #include <string>
 #include <list>
+#include <cmath>
 
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
 class Actor;
@@ -23,7 +24,7 @@ public:
 	void	createZombie(double x, double y);
 
 private:
-	const int			COLLISION_DISTANCE = 100;
+	const int			COLLISION_DISTANCE = sqrt(pow(SPRITE_WIDTH, 2) + pow(SPRITE_HEIGHT, 2));
 	Penelope*			m_penelope;
 	std::list<Actor*>	m_actors;
 	int					m_alive;

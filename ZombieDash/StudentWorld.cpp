@@ -159,6 +159,7 @@ bool StudentWorld::checkForCollisions(int dir, double x, double y)
 		}
 		double actorX = (*it)->getX();
 		double actorY = (*it)->getY();	
+		double distance = (pow(actorX - x, 2) + pow(actorY - y, 2));
 		switch (dir) {
 		case 0: //right
 			if (x + SPRITE_WIDTH >= actorX && x + SPRITE_WIDTH <= actorX + SPRITE_WIDTH - 1 && y <= actorY + SPRITE_HEIGHT - 1 && y + SPRITE_HEIGHT >= actorY) {
