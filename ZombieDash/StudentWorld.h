@@ -20,11 +20,13 @@ public:
 	virtual void cleanUp();
 
 	bool	checkForCollisions(int dir, double x, double y);
-	bool	overlapWithExit(double x, double y);
-	void	createZombie(double x, double y);
+	void	overlapWithExit(double x, double y);
+	void	escape(list<Actor*>::iterator& del);
+	//void	createZombie(double x, double y);
 
 private:
 	const int			COLLISION_DISTANCE = sqrt(pow(SPRITE_WIDTH, 2) + pow(SPRITE_HEIGHT, 2));
+	const int			OVERLAP_DISTANCE = 100;
 	Penelope*			m_penelope;
 	std::list<Actor*>	m_actors;
 	int					m_alive;

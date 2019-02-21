@@ -73,11 +73,12 @@ int StudentWorld::init()
 			}
 			case Level::exit:
 			{
+				cerr << "Creating an Exit" << endl;
 				break;
 			}
 			case Level::wall:
 			{
-				cerr << "Creating a wall" << endl;
+				cerr << "Creating a Wall" << endl;
 				Wall* getWalled = new Wall(this, i * SPRITE_WIDTH, j * SPRITE_HEIGHT);
 				m_actors.push_back(getWalled);
 				break;
@@ -108,8 +109,6 @@ int StudentWorld::init()
 
 int StudentWorld::move()
 {
-	// This code is here merely to allow the game to build, run, and terminate after you hit enter.
-	// Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
 	if (!m_penelope->isDead()) {
 		m_penelope->doSomething();
 		if (m_penelope->isDead()) {
@@ -124,6 +123,10 @@ int StudentWorld::move()
 		if (m_penelope->isDead()) {
 			decLives();
 			return GWSTATUS_PLAYER_DIED;
+		}
+		if (m_victory) {
+			m_victory = false;
+			return GWSTATUS_FINISHED_LEVEL;
 		}
 		it++;
 	}
@@ -159,10 +162,9 @@ bool StudentWorld::checkForCollisions(int dir, double x, double y)
 		double actorY = (*it)->getY();	
 		double distance = (pow(actorX - x, 2) + pow(actorY - y, 2));
 		switch (dir) {
+		///*
 		case 0: //right
 			if (x + SPRITE_WIDTH >= actorX && x + SPRITE_WIDTH <= actorX + SPRITE_WIDTH - 1 && y <= actorY + SPRITE_HEIGHT - 1 && y + SPRITE_HEIGHT >= actorY) {
-				//cerr << "Actor (x, y): (" << actorX << ", " << actorY << ")" << endl;
-				//cerr << "Actor max (x, y): (" << actorX + SPRITE_WIDTH << ", " << actorY + SPRITE_HEIGHT << ")" << endl;
 				if (y + SPRITE_HEIGHT <= actorY || y >= actorY + SPRITE_HEIGHT)
 					return false;
 				return true;
@@ -170,8 +172,6 @@ bool StudentWorld::checkForCollisions(int dir, double x, double y)
 			break;
 		case 90: //up
 			if (y + SPRITE_HEIGHT >= actorY && y + SPRITE_HEIGHT <= actorY + SPRITE_HEIGHT - 1 && x <= actorX + SPRITE_WIDTH - 1 && x + SPRITE_WIDTH >= actorX) {
-				//cerr << "Actor (x, y): (" << actorX << ", " << actorY << ")" << endl;
-				//cerr << "Actor max (x, y): (" << actorX + SPRITE_WIDTH << ", " << actorY + SPRITE_HEIGHT << ")" << endl;
 				if (x + SPRITE_WIDTH <= actorX || x >= actorX + SPRITE_WIDTH)
 					return false;
 				return true;
@@ -179,8 +179,6 @@ bool StudentWorld::checkForCollisions(int dir, double x, double y)
 			break;
 		case 180: //left
 			if (x <= actorX + SPRITE_WIDTH && x >= actorX && y <= actorY + SPRITE_HEIGHT - 1 && y + SPRITE_HEIGHT >= actorY) {
-				//cerr << "Actor (x, y): (" << actorX << ", " << actorY << ")" << endl;
-				//cerr << "Actor max (x, y): (" << actorX + SPRITE_WIDTH << ", " << actorY + SPRITE_HEIGHT << ")" << endl;
 				if (y + SPRITE_HEIGHT <= actorY || y >= actorY + SPRITE_HEIGHT)
 					return false;
 				return true;
@@ -197,18 +195,45 @@ bool StudentWorld::checkForCollisions(int dir, double x, double y)
 			break;
 		default:
 			break;
+		//*/
 		}
 		it++;
 	}
 	return false;
 }
 
-bool StudentWorld::overlapWithExit(double x, double y)
+//function called whenever a citizen escapes (overlaps with exit)
+void StudentWorld::escape(list<Actor*>::iterator& del)
 {
-	double hDist = (m_penelope->getX()) * (m_penelope->getX());
-	double vDist = (m_penelope->getY()) * ()
-	if (m_penelope)
-	return false;
+	increaseScore(500);
+	m_alive--;
+	delete (*del);
+	del = m_actors.erase(del);
+}
+
+void StudentWorld::overlapWithExit(double x, double y)
+{
+	list<Actor*>::iterator it;
+	it = m_actors.begin();
+	double hDist = 0;
+	double vDist = 0;
+	while (it != m_actors.end())
+	{
+		if ((*it)->isInfectable()) {
+			hDist = ((*it)->getX()) * ((*it)->getX());
+			vDist = ((*it)->getY()) * ((*it)->getY());
+			if (vDist + hDist <= OVERLAP_DISTANCE) {
+				escape(it);
+				continue;
+			}
+		}
+		it++;
+	}
+	hDist = (m_penelope->getX()) * (m_penelope->getX());
+	vDist = (m_penelope->getY()) * (m_penelope->getY());
+	if (vDist + hDist <= OVERLAP_DISTANCE && m_alive == 0) {
+		m_victory == true;
+	}
 }
 
 /*

@@ -15,8 +15,8 @@ public:
 	}
 	virtual ~Actor();
 
-	virtual void	doSomething() = 0;
-	virtual bool	hasCollision() = 0;
+	virtual void doSomething() = 0;
+	virtual bool hasCollision() = 0;
 	virtual bool isInfectable()
 	{
 		return false;
@@ -102,7 +102,6 @@ public:
 				setDead();
 				return true;
 			}
-			return false;
 		}
 		return false;
 	}
