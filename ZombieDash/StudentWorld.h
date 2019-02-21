@@ -20,7 +20,7 @@ public:
 	virtual void cleanUp();
 
 	bool	checkForCollisions(int dir, double x, double y);
-	bool	checkForOverlap(double x, double y);
+	bool	overlapWithExit(double x, double y);
 	void	createZombie(double x, double y);
 
 private:
