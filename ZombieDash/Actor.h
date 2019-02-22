@@ -142,19 +142,34 @@ public:
 
 	virtual void	doSomething();
 
-	int getVaccines()
+	int getVaccines() const
 	{
 		return m_vaccineCount;
 	}
 
-	int getGas()
+	int getGas() const
 	{
 		return m_gasCount;
 	}
 
-	int getLandmines()
+	int getLandmines() const
 	{
 		return m_landmineCount;
+	}
+
+	void incVaccines()
+	{
+		m_vaccineCount++;
+	}
+
+	void incGas()
+	{
+		m_gasCount++;
+	}
+
+	void incLandmine()
+	{
+		m_landmineCount++;
 	}
 
 private:
@@ -250,7 +265,7 @@ public:
 class Hazard : public Environment
 {
 public:
-	Hazard(StudentWorld* world, int imageID, double startX, double startY) : Environment(world, imageID, startX, startY, right, 1) {}
+	Hazard(StudentWorld* world, int imageID, double startX, double startY, Direction dir, int depth) : Environment(world, imageID, startX, startY, dir, depth) {}
 	virtual ~Hazard();
 	virtual bool hasCollision()
 	{
@@ -262,7 +277,7 @@ public:
 class Pit : public Hazard
 {
 public:
-	Pit(StudentWorld* world, double startX, double startY) : Hazard(world, IID_PIT ,startX, startY) {}
+	Pit(StudentWorld* world, double startX, double startY) : Hazard(world, IID_PIT ,startX, startY, right, 0) {}
 	virtual ~Pit();
 
 	virtual void doSomething();
@@ -271,7 +286,7 @@ public:
 /*
 class Landmine : public Hazard
 {
-	Landmine(StudentWorld* world, double startX, double startY) : Hazard(world, IID_LANDMINE ,startX, startY) {}
+	Landmine(StudentWorld* world, double startX, double startY) : Hazard(world, IID_LANDMINE ,startX, startY, right, 1) {}
 	virtual ~Landmine();
 
 	virtual bool isDamageable() 
@@ -294,25 +309,30 @@ public:
 	Goodie(StudentWorld* world, int imageID, double startX, double startY) : Actor(world, imageID, startX, startY, 0, 1) {}
 	virtual ~Goodie();
 
+	virtual bool hasCollision()
+	{
+		return false;
+	}
+
 	virtual bool isDamageable()
 	{
 		return true;
 	}
-	virtual void doSomething();
 };
 
 class VaccineGoodie : public Goodie
 {
+public:
 	VaccineGoodie(StudentWorld* world, double startX, double startY) : Goodie(world, IID_VACCINE_GOODIE ,startX, startY) {}
 	virtual ~VaccineGoodie();
 
 	virtual void doSomething();
-
 };
 
-/*
+
 class GasCanGoodie : public Goodie
 {
+public:
 	GasCanGoodie(StudentWorld* world, double startX, double startY) : Goodie(world, IID_GAS_CAN_GOODIE ,startX, startY) {}
 	virtual ~GasCanGoodie();
 
@@ -322,13 +342,13 @@ class GasCanGoodie : public Goodie
 
 class LandmineGoodie : public Goodie
 {
+public:
 	LandmineGoodie(StudentWorld* world, double startX, double startY) : Goodie(world, IID_LANDMINE_GOODIE ,startX, startY) {}
 	virtual ~LandmineGoodie();
 
 	virtual void doSomething();
 
 };
-//*/
 /**********************************************************************************************************************************************************
 																		PROJECTILE OBJECTS
 ***********************************************************************************************************************************************************

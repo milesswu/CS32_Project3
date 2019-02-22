@@ -23,16 +23,21 @@ public:
 	//void	checkOverlap(double x, double y);
 	//bool	checkOverlapWithPenelope(double x, double y) const;
 	//bool	isSameActor(Actor* actor, Actor* other);
-	void	killActor(std::list<Actor*>::iterator& kill);
+	void	killActor(Actor* kill);
 	void	escape(std::list<Actor*>::iterator& escapee);
 	void	overlapWithExit(double x, double y);
 	void	overlapWithHazard(double x, double y);
-	void	overlapWithGoodie(double x, double y);
+	bool	pickupGoodie(double x, double y, char goodie);
 	//void	createZombie(double x, double y);
 
+	void decAlive()
+	{
+		m_alive--;
+	}
+
 private:
-	const int			COLLISION_DISTANCE = sqrt(pow(SPRITE_WIDTH, 2) + pow(SPRITE_HEIGHT, 2));
-	const int			OVERLAP_DISTANCE = 100;
+	const double			COLLISION_DISTANCE = sqrt(pow(SPRITE_WIDTH, 2) + pow(SPRITE_HEIGHT, 2));
+	const double			OVERLAP_DISTANCE = 100;
 	Penelope*			m_penelope;
 	std::list<Actor*>	m_actors;
 	int					m_alive;

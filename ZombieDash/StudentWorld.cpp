@@ -95,14 +95,20 @@ int StudentWorld::init()
 			}
 			case Level::vaccine_goodie:
 			{
+				Actor* vgoodie = new VaccineGoodie(this, i * SPRITE_WIDTH, j* SPRITE_HEIGHT);
+				m_actors.push_back(vgoodie);
 				break;
 			}
 			case Level::gas_can_goodie:
 			{
+				Actor* ggoodie = new GasCanGoodie(this, i * SPRITE_WIDTH, j* SPRITE_HEIGHT);
+				m_actors.push_back(ggoodie);
 				break;
 			}
 			case Level::landmine_goodie:
 			{
+				Actor* lgoodie = new LandmineGoodie(this, i * SPRITE_WIDTH, j* SPRITE_HEIGHT);
+				m_actors.push_back(lgoodie);
 				break;
 			}
 			default:
@@ -258,8 +264,13 @@ void StudentWorld::escape(list<Actor*>::iterator& escapee)
 	increaseScore(500);
 	m_alive--;
 	(*escapee)->setDead();
-	delete (*escapee);
-	m_actors.erase(escapee);
+	//delete (*escapee);
+	//m_actors.erase(escapee);
+}
+
+void StudentWorld::killActor(Actor* kill)
+{
+	kill->setDead();
 }
 
 void StudentWorld::overlapWithExit(double x, double y)
@@ -287,17 +298,6 @@ void StudentWorld::overlapWithExit(double x, double y)
 	}
 }
 
-void StudentWorld::killActor(list<Actor*>::iterator& kill)
-{
-	if ((*kill)->isInfectable()) {
-		increaseScore(-1000);
-		m_alive--;
-	}
-	(*kill)->setDead();
-	delete (*kill);
-	kill = m_actors.erase(kill);
-}
-
 void StudentWorld::overlapWithHazard(double x, double y)
 {
 	list<Actor*>::iterator it = m_actors.begin();
@@ -305,14 +305,12 @@ void StudentWorld::overlapWithHazard(double x, double y)
 	double vDist = 0;
 	while (it != m_actors.end())
 	{
-		if (!(*it)->isDamageable()) {
-			it++;
-			continue;
-		}
-		hDist = ((*it)->getX() - x) * ((*it)->getX() - x);
-		vDist = ((*it)->getY() - y) * ((*it)->getY() - y);
-		if (vDist + hDist <= OVERLAP_DISTANCE) {
-			killActor(it);
+		if ((*it)->isDamageable()) {
+			hDist = ((*it)->getX() - x) * ((*it)->getX() - x);
+			vDist = ((*it)->getY() - y) * ((*it)->getY() - y);
+			if (vDist + hDist <= OVERLAP_DISTANCE) {
+				killActor(*it);
+			}
 		}
 		it++;
 	}
@@ -321,6 +319,31 @@ void StudentWorld::overlapWithHazard(double x, double y)
 	if (vDist + hDist <= OVERLAP_DISTANCE && m_alive == 0) {
 		m_penelope->setDead();
 	}
+}
+
+bool StudentWorld::pickupGoodie(double x, double y, char goodie)
+{
+	double hDist = 0;
+	double vDist = 0;
+	hDist = (m_penelope->getX() - x) * (m_penelope->getX() - x);
+	vDist = (m_penelope->getY() - y) * (m_penelope->getY() - y);
+	if (vDist + hDist <= OVERLAP_DISTANCE) {
+		switch (goodie) {
+		case 'v':
+			m_penelope->incVaccines();
+			break;
+		case 'g':
+			m_penelope->incGas();
+			break;
+		case 'l':
+			m_penelope->incLandmine();
+			break;
+		default:
+			break;
+		}
+		return true;
+	}
+	return false;
 }
 
 /*

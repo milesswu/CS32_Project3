@@ -157,7 +157,6 @@ Pit::~Pit()
 void Pit::doSomething()
 {
 	getWorld()->overlapWithHazard(getX(), getY());
-	return;
 }
 
 /**********************************************************************************************************************************************************
@@ -170,6 +169,44 @@ Goodie::~Goodie()
 	cerr << "Destroying a Goodie Object" << endl;
 }
 
+VaccineGoodie::~VaccineGoodie()
+{
+	cerr << "Destorying a Vaccine" << endl;
+}
+
+void VaccineGoodie::doSomething()
+{
+	if (getWorld()->pickupGoodie(getX(), getY(), 'v')) {
+		getWorld()->increaseScore(50);
+		getWorld()->killActor(this);
+	}
+}
+
+GasCanGoodie::~GasCanGoodie()
+{
+	cerr << "Destroying a Gas Can" << endl;
+}
+
+void GasCanGoodie::doSomething()
+{
+	if (getWorld()->pickupGoodie(getX(), getY(), 'g')) {
+		getWorld()->increaseScore(50);
+		getWorld()->killActor(this);
+	}
+}
+
+LandmineGoodie::~LandmineGoodie()
+{
+	cerr << "Destroying a Landmine Goodie" << endl;
+}
+
+void LandmineGoodie::doSomething()
+{
+	if (getWorld()->pickupGoodie(getX(), getY(), 'l')) {
+		getWorld()->increaseScore(50);
+		getWorld()->killActor(this);
+	}
+}
 
 /**********************************************************************************************************************************************************
 																PROJECTILE OBJECT IMPLEMENTATIONS
