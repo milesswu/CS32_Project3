@@ -23,10 +23,11 @@ public:
 	//void	checkOverlap(double x, double y);
 	//bool	checkOverlapWithPenelope(double x, double y) const;
 	//bool	isSameActor(Actor* actor, Actor* other);
-	void	overlapWithExit(double x, double y);
-	void	escape(std::list<Actor*>::iterator& escapee);
-	void	overlapWithHazard(double x, double y);
 	void	killActor(std::list<Actor*>::iterator& kill);
+	void	escape(std::list<Actor*>::iterator& escapee);
+	void	overlapWithExit(double x, double y);
+	void	overlapWithHazard(double x, double y);
+	void	overlapWithGoodie(double x, double y);
 	//void	createZombie(double x, double y);
 
 private:
