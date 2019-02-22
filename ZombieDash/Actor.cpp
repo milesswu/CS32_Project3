@@ -224,3 +224,38 @@ void LandmineGoodie::doSomething()
 																PROJECTILE OBJECT IMPLEMENTATIONS
 ***********************************************************************************************************************************************************
 */
+
+Projectile::~Projectile()
+{
+	cerr << "Destroying a Projectile Object" << endl;
+}
+
+void Projectile::doSomething()
+{
+	if (m_lifespan == 0)
+		setDead();
+	decLife();
+}
+
+Vomit::~Vomit()
+{
+	cerr << "Destroying Vomit" << endl;
+}
+
+void Vomit::doSomething()
+{
+	Projectile::doSomething();
+}
+
+Flame::~Flame()
+{
+	cerr << "Destroying a Flame" << endl;
+}
+
+void Flame::doSomething()
+{
+	if (getWorld()->checkOverlapWithPenelope(getX(), getY())) {
+		getWorld()->killPenelope();
+	}
+	Projectile::doSomething();
+}

@@ -355,15 +355,24 @@ public:
 																		PROJECTILE OBJECTS
 ***********************************************************************************************************************************************************
 */
-/*
+
 class Projectile : public Actor
 {
 public:
-	Projectile(StudentWorld* world, int imageID, double startX, double startY, Direction dir);
+	Projectile(StudentWorld* world, int imageID, double startX, double startY, Direction dir) : Actor(imageID, startX, startY, dir, 0) 
+	{
+		m_lifespan = 2;
+	}
 	virtual ~Projectile();
+	virtual void doSomething();
+	
+	void decLife()
+	{
+		m_lifespan--;
+	}
 
-	virtual void doSomething() = 0;
-
+private:
+	int m_lifespan;
 };
 
 class Vomit : public Projectile	
@@ -383,5 +392,5 @@ class Flame : public Projectile
 	virtual void doSomething();
 
 };
-//*/
+
 #endif // ACTOR_H_
