@@ -169,6 +169,12 @@ Goodie::~Goodie()
 	cerr << "Destroying a Goodie Object" << endl;
 }
 
+void Goodie::doSomething()
+{
+	getWorld()->increaseScore(50);
+	getWorld()->killActor(this);
+}
+
 VaccineGoodie::~VaccineGoodie()
 {
 	cerr << "Destorying a Vaccine" << endl;
@@ -176,10 +182,8 @@ VaccineGoodie::~VaccineGoodie()
 
 void VaccineGoodie::doSomething()
 {
-	if (getWorld()->pickupGoodie(getX(), getY(), 'v')) {
-		getWorld()->increaseScore(50);
-		getWorld()->killActor(this);
-	}
+	if (getWorld()->pickupGoodie(getX(), getY(), 'v'))
+		Goodie::doSomething();
 }
 
 GasCanGoodie::~GasCanGoodie()
@@ -189,10 +193,8 @@ GasCanGoodie::~GasCanGoodie()
 
 void GasCanGoodie::doSomething()
 {
-	if (getWorld()->pickupGoodie(getX(), getY(), 'g')) {
-		getWorld()->increaseScore(50);
-		getWorld()->killActor(this);
-	}
+	if (getWorld()->pickupGoodie(getX(), getY(), 'g'))
+		Goodie::doSomething();
 }
 
 LandmineGoodie::~LandmineGoodie()
@@ -202,10 +204,8 @@ LandmineGoodie::~LandmineGoodie()
 
 void LandmineGoodie::doSomething()
 {
-	if (getWorld()->pickupGoodie(getX(), getY(), 'l')) {
-		getWorld()->increaseScore(50);
-		getWorld()->killActor(this);
-	}
+	if (getWorld()->pickupGoodie(getX(), getY(), 'l'))
+		Goodie::doSomething();
 }
 
 /**********************************************************************************************************************************************************

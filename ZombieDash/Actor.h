@@ -308,6 +308,7 @@ class Goodie : public Actor
 public:
 	Goodie(StudentWorld* world, int imageID, double startX, double startY) : Actor(world, imageID, startX, startY, 0, 1) {}
 	virtual ~Goodie();
+	virtual void doSomething();
 
 	virtual bool hasCollision()
 	{
