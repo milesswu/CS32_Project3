@@ -95,20 +95,20 @@ int StudentWorld::init()
 			}
 			case Level::vaccine_goodie:
 			{
-				Actor* vgoodie = new VaccineGoodie(this, i * SPRITE_WIDTH, j* SPRITE_HEIGHT);
-				m_actors.push_back(vgoodie);
+				Actor* vGoodie = new VaccineGoodie(this, i * SPRITE_WIDTH, j* SPRITE_HEIGHT);
+				m_actors.push_back(vGoodie);
 				break;
 			}
 			case Level::gas_can_goodie:
 			{
-				Actor* ggoodie = new GasCanGoodie(this, i * SPRITE_WIDTH, j* SPRITE_HEIGHT);
-				m_actors.push_back(ggoodie);
+				Actor* gGoodie = new GasCanGoodie(this, i * SPRITE_WIDTH, j* SPRITE_HEIGHT);
+				m_actors.push_back(gGoodie);
 				break;
 			}
 			case Level::landmine_goodie:
 			{
-				Actor* lgoodie = new LandmineGoodie(this, i * SPRITE_WIDTH, j* SPRITE_HEIGHT);
-				m_actors.push_back(lgoodie);
+				Actor* lGoodie = new LandmineGoodie(this, i * SPRITE_WIDTH, j* SPRITE_HEIGHT);
+				m_actors.push_back(lGoodie);
 				break;
 			}
 			default:
@@ -261,8 +261,6 @@ void StudentWorld::escape(list<Actor*>::iterator& escapee)
 	increaseScore(500);
 	m_alive--;
 	(*escapee)->setDead();
-	//delete (*escapee);
-	//m_actors.erase(escapee);
 }
 
 void StudentWorld::killActor(Actor* kill)
