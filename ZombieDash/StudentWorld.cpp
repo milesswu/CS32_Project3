@@ -32,7 +32,7 @@ StudentWorld::~StudentWorld()
 int StudentWorld::init()
 {
 	Level lev(assetPath());
-	int levNum = getLevel();
+	int levNum = getLevel() + 1;
 	ostringstream oss;
 	oss.fill('0');
 	oss << "level" << setw(2) << levNum << ".txt";
@@ -143,10 +143,6 @@ int StudentWorld::move()
 	list<Actor*>::iterator it;
 	it = m_actors.begin();
 	while (it != m_actors.end()) {
-		if ((*it)->isDead()) {
-			it++;
-			continue;
-		}
 		(*it)->doSomething();
 		if (m_penelope->isDead()) {
 			decLives();
@@ -156,9 +152,10 @@ int StudentWorld::move()
 			m_victory = false;
 			return GWSTATUS_FINISHED_LEVEL;
 		}
+		checkDead(it);
 		it++;
 	}
-	checkDead();
+	//checkDead();
 	return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -355,14 +352,17 @@ void StudentWorld::createZombie(double x, double y)
 */
 
 //checks each actor to see if any actors died during the current tick, if so delete them and erase from the list of current actors
-void StudentWorld::checkDead() {
+void StudentWorld::checkDead(list<Actor*>::iterator& currIt) {
 	list<Actor*>::iterator it;
 	it = m_actors.begin();
 	while (it != m_actors.end()) {
 		if ((*it)->isDead()) {
 			delete (*it);
 			(*it) = nullptr;
-			it = m_actors.erase(it);
+			list<Actor*>::iterator temp = m_actors.erase(it);
+			if (it == currIt)
+				currIt = temp;
+			it = temp;
 			continue;
 		}
 		it++;

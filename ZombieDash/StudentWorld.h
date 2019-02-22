@@ -43,7 +43,7 @@ private:
 	int					m_alive;
 	bool				m_victory;
 
-	void checkDead();
+	void checkDead(std::list<Actor*>::iterator& currIt);
 };
 
 #endif // STUDENTWORLD_H_
