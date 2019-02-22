@@ -20,13 +20,13 @@ public:
 	virtual void cleanUp();
 
 	bool	checkForCollisions(int dir, double x, double y) const;
-	Actor*	checkOverlap(double x, double y) const;
-	bool	checkOverlapWithPenelope(double x, double y) const;
-	bool	isSameActor(Actor* actor, Actor* other);
+	//void	checkOverlap(double x, double y);
+	//bool	checkOverlapWithPenelope(double x, double y) const;
+	//bool	isSameActor(Actor* actor, Actor* other);
 	void	overlapWithExit(double x, double y);
-	void	escape(Actor* escapee);
+	void	escape(std::list<Actor*>::iterator& escapee);
 	void	overlapWithHazard(double x, double y);
-	void	killActor(Actor* kill);
+	void	killActor(std::list<Actor*>::iterator& kill);
 	//void	createZombie(double x, double y);
 
 private:

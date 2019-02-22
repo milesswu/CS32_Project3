@@ -223,7 +223,8 @@ bool StudentWorld::checkForCollisions(int dir, double x, double y) const
 	return false;
 }
 
-Actor* StudentWorld::checkOverlap(double x, double y) const
+/*
+void StudentWorld::checkOverlap(double x, double y) const
 {
 	list<Actor*>::const_iterator it;
 	it = m_actors.begin();
@@ -249,17 +250,18 @@ bool StudentWorld::checkOverlapWithPenelope(double x, double y) const
 		return true;
 	}
 }
+*/
 
 //function called whenever a citizen escapes (overlaps with exit)
-void StudentWorld::escape(Actor* escapee)
+void StudentWorld::escape(list<Actor*>::iterator& escapee)
 {
 	increaseScore(500);
 	m_alive--;
-	list<Actor*>::iterator deleteIt = find(m_actors.begin(), m_actors.end(), escapee);
-	delete (*deleteIt);
-	m_actors.erase(deleteIt);
+	(*escapee)->setDead();
+	delete (*escapee);
+	m_actors.erase(escapee);
 }
-/*
+
 void StudentWorld::overlapWithExit(double x, double y)
 {
 	list<Actor*>::iterator it;
@@ -284,16 +286,18 @@ void StudentWorld::overlapWithExit(double x, double y)
 		m_victory = true;
 	}
 }
-*/
-void StudentWorld::killActor(Actor* kill)
+
+void StudentWorld::killActor(list<Actor*>::iterator& kill)
 {
-	if (kill->isInfectable()) {
+	if ((*kill)->isInfectable()) {
 		increaseScore(-1000);
 		m_alive--;
 	}
-
+	(*kill)->setDead();
+	delete (*kill);
+	kill = m_actors.erase(kill);
 }
-/*
+
 void StudentWorld::overlapWithHazard(double x, double y)
 {
 	list<Actor*>::iterator it = m_actors.begin();
@@ -318,7 +322,7 @@ void StudentWorld::overlapWithHazard(double x, double y)
 		m_penelope->setDead();
 	}
 }
-*/
+
 /*
 void StudentWorld::createZombie(double x, double y)
 {
