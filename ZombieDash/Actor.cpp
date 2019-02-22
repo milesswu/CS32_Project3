@@ -254,6 +254,7 @@ Flame::~Flame()
 
 void Flame::doSomething()
 {
+	getWorld()->overlapWithHazard(getX(), getY());
 	if (getWorld()->checkOverlapWithPenelope(getX(), getY())) {
 		getWorld()->killPenelope();
 	}

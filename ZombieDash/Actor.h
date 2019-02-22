@@ -18,6 +18,10 @@ public:
 	virtual void doSomething() = 0;
 	virtual bool hasCollision() = 0;
 
+	virtual bool blockFlames() {
+		return false;
+	}
+
 	virtual bool isInfectable()
 	{
 		return false;
@@ -246,6 +250,11 @@ public:
 	{
 		return true;
 	}
+
+	virtual bool blockFlames()
+	{
+		return true;
+	}
 };
 
 class Exit : public Environment
@@ -258,6 +267,11 @@ public:
 	virtual bool hasCollision()
 	{
 		return false;
+	}
+
+	virtual bool blockFlames()
+	{
+		return true;
 	}
 
 };
