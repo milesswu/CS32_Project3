@@ -166,11 +166,14 @@ private:
 /*
 class Citizen : public InfectablePlayer
 {
+public:
 	Citizen(StudentWorld* world, double startX, double startY) : InfectablePlayer(world, IID_CITIZEN, startX, startY) {}
 	virtual ~Citizen();
 
 	virtual void doSomething();
 
+private:
+	bool m_escaped;
 };
 
 class Zombie : public Player
@@ -284,7 +287,7 @@ class Landmine : public Hazard
 																		GOODIE OBJECTS
 ***********************************************************************************************************************************************************
 */
-/*
+
 class Goodie : public Actor
 {
 public:
@@ -296,7 +299,6 @@ public:
 		return true;
 	}
 	virtual void doSomething();
-
 };
 
 class VaccineGoodie : public Goodie
@@ -308,6 +310,7 @@ class VaccineGoodie : public Goodie
 
 };
 
+/*
 class GasCanGoodie : public Goodie
 {
 	GasCanGoodie(StudentWorld* world, double startX, double startY) : Goodie(world, IID_GAS_CAN_GOODIE ,startX, startY) {}

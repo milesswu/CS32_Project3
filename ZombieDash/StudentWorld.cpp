@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <algorithm>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetPath)
@@ -168,9 +169,9 @@ void StudentWorld::cleanUp()
 	}
 }
 
-bool StudentWorld::checkForCollisions(int dir, double x, double y)
+bool StudentWorld::checkForCollisions(int dir, double x, double y) const
 {
-	list<Actor*>::iterator it;
+	list<Actor*>::const_iterator it;
 	it = m_actors.begin();
 	while (it != m_actors.end())
 	{
@@ -222,15 +223,43 @@ bool StudentWorld::checkForCollisions(int dir, double x, double y)
 	return false;
 }
 
+Actor* StudentWorld::checkOverlap(double x, double y) const
+{
+	list<Actor*>::const_iterator it;
+	it = m_actors.begin();
+	double hDist = 0;
+	double vDist = 0;
+	while (it != m_actors.end())
+	{
+		hDist = ((*it)->getX() - x) * ((*it)->getX() - x);
+		vDist = ((*it)->getY() - y) * ((*it)->getY() - y);
+		if (vDist + hDist <= OVERLAP_DISTANCE) {
+			return (*it);
+		}
+		it++;
+	}
+	return nullptr;
+}
+
+bool StudentWorld::checkOverlapWithPenelope(double x, double y) const
+{
+	double hDist = (m_penelope->getX() - x) * (m_penelope->getX() - x);
+	double vDist = (m_penelope->getY() - y) * (m_penelope->getY() - y);
+	if (vDist + hDist <= OVERLAP_DISTANCE && m_alive == 0) {
+		return true;
+	}
+}
+
 //function called whenever a citizen escapes (overlaps with exit)
-void StudentWorld::escape(list<Actor*>::iterator& del)
+void StudentWorld::escape(Actor* escapee)
 {
 	increaseScore(500);
 	m_alive--;
-	delete (*del);
-	del = m_actors.erase(del);
+	list<Actor*>::iterator deleteIt = find(m_actors.begin(), m_actors.end(), escapee);
+	delete (*deleteIt);
+	m_actors.erase(deleteIt);
 }
-
+/*
 void StudentWorld::overlapWithExit(double x, double y)
 {
 	list<Actor*>::iterator it;
@@ -255,15 +284,16 @@ void StudentWorld::overlapWithExit(double x, double y)
 		m_victory = true;
 	}
 }
-
-void StudentWorld::killActor(list<Actor*>::iterator& del)
+*/
+void StudentWorld::killActor(Actor* kill)
 {
-	if ((*del)->isInfectable())
+	if (kill->isInfectable()) {
+		increaseScore(-1000);
 		m_alive--;
-	delete (*del);
-	del = m_actors.erase(del);
-}
+	}
 
+}
+/*
 void StudentWorld::overlapWithHazard(double x, double y)
 {
 	list<Actor*>::iterator it = m_actors.begin();
@@ -288,6 +318,7 @@ void StudentWorld::overlapWithHazard(double x, double y)
 		m_penelope->setDead();
 	}
 }
+*/
 /*
 void StudentWorld::createZombie(double x, double y)
 {

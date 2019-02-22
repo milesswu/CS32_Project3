@@ -135,7 +135,12 @@ Exit::~Exit()
 
 void Exit::doSomething()
 {
-	getWorld()->overlapWithExit(getX(), getY());
+	Actor* overlap = (getWorld()->checkOverlap(getX(), getY());
+	if (overlap != nullptr) {
+		if (overlap->isInfectable())
+			getWorld()->escape(overlap);
+	}
+
 	return;
 }
 
