@@ -17,6 +17,7 @@ public:
 
 	virtual void doSomething() = 0;
 	virtual bool hasCollision() = 0;
+
 	virtual bool isInfectable()
 	{
 		return false;
@@ -27,11 +28,6 @@ public:
 		return false;
 	}
 
-	StudentWorld* getWorld() const
-	{
-		return m_world;
-	}
-
 	bool isDead() const
 	{
 		return m_isDead;
@@ -40,6 +36,11 @@ public:
 	void setDead()
 	{
 		m_isDead = true;
+	}
+
+	StudentWorld* getWorld() const
+	{
+		return m_world;
 	}
 
 private:
