@@ -136,7 +136,10 @@ Exit::~Exit()
 void Exit::doSomething()
 {
 	getWorld()->overlapWithExit(getX(), getY());
-	return;
+	if (getWorld()->checkOverlapWithPenelope(getX(), getY())) {
+		if (getWorld()->leftAlive() == 0)
+			getWorld()->completeLevel();
+	}
 }
 
 /**********************************************************************************************************************************************************
@@ -157,6 +160,9 @@ Pit::~Pit()
 void Pit::doSomething()
 {
 	getWorld()->overlapWithHazard(getX(), getY());
+	if (getWorld()->checkOverlapWithPenelope(getX(), getY())) {
+		getWorld()->killPenelope();
+	}
 }
 
 /**********************************************************************************************************************************************************
@@ -182,8 +188,10 @@ VaccineGoodie::~VaccineGoodie()
 
 void VaccineGoodie::doSomething()
 {
-	if (getWorld()->pickupGoodie(getX(), getY(), 'v'))
+	if (getWorld()->checkOverlapWithPenelope(getX(), getY())) {
+		getWorld()->pickupGoodie('v');
 		Goodie::doSomething();
+	}
 }
 
 GasCanGoodie::~GasCanGoodie()
@@ -193,8 +201,10 @@ GasCanGoodie::~GasCanGoodie()
 
 void GasCanGoodie::doSomething()
 {
-	if (getWorld()->pickupGoodie(getX(), getY(), 'g'))
+	if (getWorld()->checkOverlapWithPenelope(getX(), getY())) {
+		getWorld()->pickupGoodie('g');
 		Goodie::doSomething();
+	}
 }
 
 LandmineGoodie::~LandmineGoodie()
@@ -204,8 +214,10 @@ LandmineGoodie::~LandmineGoodie()
 
 void LandmineGoodie::doSomething()
 {
-	if (getWorld()->pickupGoodie(getX(), getY(), 'l'))
+	if (getWorld()->checkOverlapWithPenelope(getX(), getY())) {
+		getWorld()->pickupGoodie('l');
 		Goodie::doSomething();
+	}
 }
 
 /**********************************************************************************************************************************************************

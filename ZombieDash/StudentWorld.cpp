@@ -21,6 +21,7 @@ StudentWorld::StudentWorld(string assetPath)
 	m_penelope = nullptr;
 	m_alive = 0;
 	m_victory = false;
+	m_completeLevel = false;
 }
 
 StudentWorld::~StudentWorld()
@@ -148,8 +149,8 @@ int StudentWorld::move()
 			decLives();
 			return GWSTATUS_PLAYER_DIED;
 		}
-		if (m_victory == true) {
-			m_victory = false;
+		if (m_completeLevel == true) {
+			m_completeLevel = false;
 			return GWSTATUS_FINISHED_LEVEL;
 		}
 		checkDead(it);
@@ -170,6 +171,16 @@ void StudentWorld::cleanUp()
 		(*del) = nullptr;
 		del = m_actors.erase(del);
 	}
+}
+
+void StudentWorld::killActor(Actor* kill)
+{
+	kill->setDead();
+}
+
+void StudentWorld::killPenelope()
+{
+	m_penelope->setDead();
 }
 
 bool StudentWorld::checkForCollisions(int dir, double x, double y) const
@@ -244,30 +255,19 @@ void StudentWorld::checkOverlap(double x, double y) const
 	}
 	return nullptr;
 }
+*/
 
 bool StudentWorld::checkOverlapWithPenelope(double x, double y) const
 {
 	double hDist = (m_penelope->getX() - x) * (m_penelope->getX() - x);
 	double vDist = (m_penelope->getY() - y) * (m_penelope->getY() - y);
-	if (vDist + hDist <= OVERLAP_DISTANCE && m_alive == 0) {
+	if (vDist + hDist <= OVERLAP_DISTANCE) {
 		return true;
 	}
-}
-*/
-
-//function called whenever a citizen escapes (overlaps with exit)
-void StudentWorld::escape(list<Actor*>::iterator& escapee)
-{
-	increaseScore(500);
-	m_alive--;
-	(*escapee)->setDead();
+	return false;
 }
 
-void StudentWorld::killActor(Actor* kill)
-{
-	kill->setDead();
-}
-
+//tests if any citizens overlap with a specified exit, if so, has them escape
 void StudentWorld::overlapWithExit(double x, double y)
 {
 	list<Actor*>::iterator it;
@@ -286,13 +286,9 @@ void StudentWorld::overlapWithExit(double x, double y)
 		}
 		it++;
 	}
-	hDist = (m_penelope->getX() - x) * (m_penelope->getX() - x);
-	vDist = (m_penelope->getY() - y) * (m_penelope->getY() - y);
-	if (vDist + hDist <= OVERLAP_DISTANCE && m_alive == 0) {
-		m_victory = true;
-	}
 }
 
+//checks if any actors overlap with a specified hazard object
 void StudentWorld::overlapWithHazard(double x, double y)
 {
 	list<Actor*>::iterator it = m_actors.begin();
@@ -309,36 +305,32 @@ void StudentWorld::overlapWithHazard(double x, double y)
 		}
 		it++;
 	}
-	hDist = (m_penelope->getX() - x) * (m_penelope->getX() - x);
-	vDist = (m_penelope->getY() - y) * (m_penelope->getY() - y);
-	if (vDist + hDist <= OVERLAP_DISTANCE && m_alive == 0) {
-		m_penelope->setDead();
-	}
 }
 
-bool StudentWorld::pickupGoodie(double x, double y, char goodie)
+//function called whenever a citizen escapes (overlaps with exit)
+void StudentWorld::escape(list<Actor*>::iterator& escapee)
 {
-	double hDist = 0;
-	double vDist = 0;
-	hDist = (m_penelope->getX() - x) * (m_penelope->getX() - x);
-	vDist = (m_penelope->getY() - y) * (m_penelope->getY() - y);
-	if (vDist + hDist <= OVERLAP_DISTANCE) {
-		switch (goodie) {
-		case 'v':
-			m_penelope->incVaccines();
-			break;
-		case 'g':
-			m_penelope->incGas();
-			break;
-		case 'l':
-			m_penelope->incLandmine();
-			break;
-		default:
-			break;
-		}
-		return true;
+	increaseScore(500);
+	m_alive--;
+	(*escapee)->setDead();
+}
+
+//function called whenever penelope overlaps with a goodie
+void StudentWorld::pickupGoodie(char goodie)
+{
+	switch (goodie) {
+	case 'v':
+		m_penelope->incVaccines();
+		break;
+	case 'g':
+		m_penelope->incGas();
+		break;
+	case 'l':
+		m_penelope->incLandmine();
+		break;
+	default:
+		break;
 	}
-	return false;
 }
 
 /*
