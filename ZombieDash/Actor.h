@@ -16,7 +16,11 @@ public:
 	virtual ~Actor();
 
 	virtual void doSomething() = 0;
-	virtual bool hasCollision() = 0;
+	virtual void kill() = 0;
+	virtual bool hasCollision()
+	{
+		return false;
+	}
 
 	virtual bool blockFlames() {
 		return false;
@@ -28,6 +32,11 @@ public:
 	}
 
 	virtual bool isDamageable()
+	{
+		return false;
+	}
+
+	virtual bool doesMove()
 	{
 		return false;
 	}
@@ -61,7 +70,7 @@ private:
 class Player : public Actor
 {
 public:
-	Player(StudentWorld* world, int imageID, double startX, double startY) : Actor(world, imageID, startX, startY) {}
+	Player(StudentWorld* world, int imageID, double startX, double startY, Direction dir = right) : Actor(world, imageID, startX, startY, dir) {}
 	virtual ~Player();
 
 	virtual bool hasCollision()
@@ -70,6 +79,11 @@ public:
 	}
 
 	virtual bool isDamageable()
+	{
+		return true;
+	}
+
+	virtual bool doesMove()
 	{
 		return true;
 	}
@@ -88,7 +102,7 @@ public:
 		m_infectionCount = 0;
 	}
 	virtual ~InfectablePlayer();
-
+	virtual void doSomething();
 	virtual bool isInfectable()
 	{
 		return true;
@@ -99,16 +113,9 @@ public:
 		return m_isInfected;
 	}
 
-	bool infect()
+	void infect()
 	{
-		if (isInfected()) {
-			m_infectionCount++;
-			if (m_infectionCount == INFECT_LEVEL) {
-				setDead();
-				return true;
-			}
-		}
-		return false;
+		m_isInfected = true;
 	}
 
 	int infectionCount()
@@ -125,6 +132,7 @@ public:
 	void cure()
 	{
 		m_infectionCount = 0;
+		m_isInfected = false;
 	}
 
 private:
@@ -144,8 +152,11 @@ public:
 		m_landmineCount = 0;
 	}
 	virtual ~Penelope();
+	virtual void doSomething();
+	virtual void kill();
 
-	virtual void	doSomething();
+	void shootFlamethrower(Direction dir);
+	void deployMine();
 
 	int getVaccines() const
 	{
@@ -169,13 +180,23 @@ public:
 
 	void incGas()
 	{
-		m_gasCount++;
+		m_gasCount += 5;
 	}
 
 	void incLandmine()
 	{
-		m_landmineCount++;
+		m_landmineCount += 2;
 	}
+
+	void useVaccine()
+	{
+		if (m_vaccineCount > 0) {
+			cure();
+			m_vaccineCount--;
+		}
+	}
+
+
 
 private:
 	int	m_vaccineCount;
@@ -193,19 +214,25 @@ public:
 	virtual void doSomething();
 
 private:
-	bool m_escaped;
+	bool m_isParalyzed;
 };
+//*/
 
 class Zombie : public Player
 {
 public:
-	Zombie(StudentWorld* world, double startX, double startY) : Player(world, IID_ZOMBIE, startX, startY) {}
+	Zombie(StudentWorld* world, double startX, double startY, Direction dir = right) : Player(world, IID_ZOMBIE, startX, startY, dir) 
+	{
+		m_movePlan = 0;
+		m_isParalyzed = false;
+	}
 	virtual ~Zombie();
-
+	virtual void kill();
 	virtual void doSomething();
 
 private:
-	int	movePlan;
+	int		m_movePlan;
+	bool	m_isParalyzed;
 };
 
 class DumbZombie : public Zombie
@@ -217,6 +244,7 @@ class DumbZombie : public Zombie
 
 };
 
+/*
 class SmartZombie : public Zombie
 {
 	SmartZombie(StudentWorld* world, double startX, double startY) : Zombie(world, startX, startY) {}
@@ -226,7 +254,6 @@ class SmartZombie : public Zombie
 
 };
 //*/
-
 /**********************************************************************************************************************************************************
 																		ENVIRONMENT OBJECTS
 ***********************************************************************************************************************************************************
@@ -237,6 +264,7 @@ class Environment : public Actor
 public:
 	Environment(StudentWorld* world, int imageID, double startX, double startY, Direction dir = right, int depth = 0) : Actor(world, imageID, startX, startY, dir, depth) {}
 	virtual ~Environment();
+	virtual void kill() { return; }
 };
 
 class Wall : public Environment
@@ -264,11 +292,6 @@ public:
 	virtual ~Exit();
 
 	virtual void doSomething();
-	virtual bool hasCollision()
-	{
-		return false;
-	}
-
 	virtual bool blockFlames()
 	{
 		return true;
@@ -282,10 +305,6 @@ class Hazard : public Environment
 public:
 	Hazard(StudentWorld* world, int imageID, double startX, double startY, Direction dir, int depth) : Environment(world, imageID, startX, startY, dir, depth) {}
 	virtual ~Hazard();
-	virtual bool hasCollision()
-	{
-		return false;
-	}
 };
 
 
@@ -298,20 +317,49 @@ public:
 	virtual void doSomething();
 
 };
-/*
+
 class Landmine : public Hazard
 {
-	Landmine(StudentWorld* world, double startX, double startY) : Hazard(world, IID_LANDMINE ,startX, startY, right, 1) {}
+public:
+	Landmine(StudentWorld* world, double startX, double startY) : Hazard(world, IID_LANDMINE ,startX, startY, right, 1) 
+	{
+		m_isActive = false;
+		m_safetyTicks = 30;
+	}
 	virtual ~Landmine();
+	virtual void doSomething();
+	virtual void kill();
 
-	virtual bool isDamageable() 
+	virtual bool isDamageable()
 	{
 		return true;
 	}
-	virtual void doSomething();
 
+	void decSafety()
+	{
+		m_safetyTicks--;
+	}
+
+	void activate()
+	{
+		m_isActive = true;
+	}
+
+	bool isActive()
+	{
+		return m_isActive;
+	}
+
+	int getSafety()
+	{
+		return m_safetyTicks;
+	}
+
+private:
+	bool	m_isActive;
+	int		m_safetyTicks;
 };
-//*/
+
 
 /**********************************************************************************************************************************************************
 																		GOODIE OBJECTS
@@ -321,19 +369,31 @@ class Landmine : public Hazard
 class Goodie : public Actor
 {
 public:
-	Goodie(StudentWorld* world, int imageID, double startX, double startY) : Actor(world, imageID, startX, startY, 0, 1) {}
+	Goodie(StudentWorld* world, int imageID, double startX, double startY) : Actor(world, imageID, startX, startY, 0, 1) 
+	{
+		m_iTicks = 2;
+	}
 	virtual ~Goodie();
 	virtual void doSomething();
-
-	virtual bool hasCollision()
-	{
-		return false;
-	}
+	virtual void kill();
 
 	virtual bool isDamageable()
 	{
-		return true;
+		return m_iTicks == 0;
 	}
+
+	int get_iTicks()
+	{
+		return m_iTicks;
+	}
+
+	void dec_iTicks()
+	{
+		m_iTicks--;
+	}
+
+private:
+	int m_iTicks;
 };
 
 class VaccineGoodie : public Goodie
@@ -363,7 +423,6 @@ public:
 	virtual ~LandmineGoodie();
 
 	virtual void doSomething();
-
 };
 /**********************************************************************************************************************************************************
 																		PROJECTILE OBJECTS
@@ -373,13 +432,24 @@ public:
 class Projectile : public Actor
 {
 public:
-	Projectile(StudentWorld* world, int imageID, double startX, double startY, Direction dir) : Actor(imageID, startX, startY, dir, 0) 
+	Projectile(StudentWorld* world, int imageID, double startX, double startY, Direction dir) : Actor(world, imageID, startX, startY, dir, 0) 
 	{
 		m_lifespan = 2;
 	}
 	virtual ~Projectile();
 	virtual void doSomething();
-	
+
+	virtual bool isDamgeable()
+	{
+		return false;
+	}
+
+	virtual void kill();
+	int getLife()
+	{
+		return m_lifespan;
+	}
+
 	void decLife()
 	{
 		m_lifespan--;
@@ -391,6 +461,7 @@ private:
 
 class Vomit : public Projectile	
 {
+public:
 	Vomit(StudentWorld* world, double startX, double startY, Direction dir) : Projectile(world, IID_VOMIT ,startX, startY, dir) {}
 	virtual ~Vomit();
 
@@ -400,6 +471,7 @@ class Vomit : public Projectile
 
 class Flame : public Projectile
 {
+public:
 	Flame(StudentWorld* world, double startX, double startY, Direction dir) : Projectile(world, IID_FLAME, startX, startY, dir) {}
 	virtual ~Flame();
 

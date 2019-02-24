@@ -19,16 +19,19 @@ public:
 	virtual int move();
 	virtual void cleanUp();
 
-	bool	checkForCollisions(int dir, double x, double y) const;
-	//void	checkOverlap(double x, double y);
+	bool	checkWallCollisions(int dir, double x, double y) const;
+	bool	checkFlameCollisions(double x, double y) const;
+	bool	checkOverlap(double x, double y, char type);
 	bool	checkOverlapWithPenelope(double x, double y) const;
-	void	killActor(Actor* kill);
+	void	infectPenelope();
 	void	killPenelope();
 	void	escape(std::list<Actor*>::iterator& escapee);
-	void	overlapWithExit(double x, double y);
-	void	overlapWithHazard(double x, double y);
 	void	pickupGoodie(char goodie);
-	//void	createZombie(double x, double y);
+	bool	createFlame(double x, double y, int dir);
+	void	explode(double x, double y);
+	void	shootFlamethrower(int dir);
+	void	deployMine(double x, double y);
+	void	createZombie(double x, double y, int dir);
 
 	void completeLevel()
 	{

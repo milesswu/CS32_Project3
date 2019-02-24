@@ -33,7 +33,7 @@ void Player::move(Direction dir, double x, double y)
 	setDirection(dir);
 	//cerr << "Penelope (x, y): (" << getX() << ", " << getY() << ")" << endl;
 	//cerr << "Penelope max(?) (x, y): (" << getX() + SPRITE_WIDTH - 1 << ", " << getY() + SPRITE_HEIGHT - 1 << ")" << endl;
-	if (getWorld()->checkForCollisions(dir, getX(), getY()))
+	if (getWorld()->checkWallCollisions(dir, getX(), getY()))
 		return;
 	moveTo(x, y);
 }
@@ -44,6 +44,13 @@ InfectablePlayer::~InfectablePlayer()
 	cerr << "Destroying Infectable Player Object" << endl;
 }
 
+void InfectablePlayer::doSomething()
+{
+	if (incInfection() == 500) {
+		getWorld()->createZombie(getX(), getY(), getDirection());
+		kill();
+	}
+}
 
 /**********************************************************************************************************************************************************
 																		PENELOPE MEMBER FUNCTIONS
@@ -61,8 +68,6 @@ void Penelope::doSomething()
 {
 	if (isDead())
 		return;
-	if (infect())
-		return;
 	int keyPress;
 	if (getWorld()->getKey(keyPress)) {
 		switch (keyPress) {
@@ -78,8 +83,39 @@ void Penelope::doSomething()
 		case KEY_PRESS_UP:
 			move(up, getX(), getY() + 4);
 			break;
+		case KEY_PRESS_ENTER:
+			useVaccine();
+			break;
+		case KEY_PRESS_SPACE:
+			shootFlamethrower(getDirection());
+			break;
+		case KEY_PRESS_TAB:
+			deployMine();
+			break;
 		}
 	}
+}
+
+void Penelope::shootFlamethrower(Direction dir)
+{
+	if (getGas() <= 0)
+		return;
+	getWorld()->shootFlamethrower(dir);
+	m_gasCount--;
+
+}
+
+void Penelope::deployMine()
+{
+	if (getLandmines() <= 0)
+		return;
+	getWorld()->deployMine(getX(), getY());
+	m_landmineCount--;
+}
+
+void Penelope::kill()
+{
+	setDead();
 }
 
 /**********************************************************************************************************************************************************
@@ -94,9 +130,21 @@ void Penelope::doSomething()
 ***********************************************************************************************************************************************************
 */
 
+Zombie::~Zombie()
+{
+	cerr << "Destroying a Zombie Object" << endl;
+}
 
+void Zombie::doSomething()
+{
+	return;
+}
 
-
+void Zombie::kill()
+{
+	getWorld()->increaseScore(1000);
+	setDead();
+}
 /**********************************************************************************************************************************************************
 																		DUMBZOMBIE MEMBER FUNCTIONS
 ***********************************************************************************************************************************************************
@@ -135,7 +183,7 @@ Exit::~Exit()
 
 void Exit::doSomething()
 {
-	getWorld()->overlapWithExit(getX(), getY());
+	getWorld()->checkOverlap(getX(), getY(), 'e');
 	if (getWorld()->checkOverlapWithPenelope(getX(), getY())) {
 		if (getWorld()->leftAlive() == 0)
 			getWorld()->completeLevel();
@@ -159,10 +207,35 @@ Pit::~Pit()
 
 void Pit::doSomething()
 {
-	getWorld()->overlapWithHazard(getX(), getY());
+	getWorld()->checkOverlap(getX(), getY(), 'h');
 	if (getWorld()->checkOverlapWithPenelope(getX(), getY())) {
 		getWorld()->killPenelope();
 	}
+}
+
+Landmine::~Landmine()
+{
+	cerr << "Destroying a Landmine" << endl;
+}
+
+void Landmine::doSomething()
+{
+	if (isActive() == false) {
+		decSafety();
+		if (getSafety() == 0)
+			activate();
+	}
+	else {
+		if (getWorld()->checkOverlapWithPenelope(getX(), getY()) || getWorld()->checkOverlap(getX(), getY(), 'l')) {
+			kill();
+		}
+	}
+}
+
+void Landmine::kill()
+{
+	getWorld()->explode(getX(), getY());
+	setDead();
 }
 
 /**********************************************************************************************************************************************************
@@ -178,7 +251,12 @@ Goodie::~Goodie()
 void Goodie::doSomething()
 {
 	getWorld()->increaseScore(50);
-	getWorld()->killActor(this);
+	kill();
+}
+
+void Goodie::kill()
+{
+	setDead();
 }
 
 VaccineGoodie::~VaccineGoodie()
@@ -192,6 +270,9 @@ void VaccineGoodie::doSomething()
 		getWorld()->pickupGoodie('v');
 		Goodie::doSomething();
 	}
+
+	if (get_iTicks() != 0)
+		dec_iTicks();
 }
 
 GasCanGoodie::~GasCanGoodie()
@@ -205,6 +286,9 @@ void GasCanGoodie::doSomething()
 		getWorld()->pickupGoodie('g');
 		Goodie::doSomething();
 	}
+
+	if (get_iTicks() != 0)
+		dec_iTicks();
 }
 
 LandmineGoodie::~LandmineGoodie()
@@ -218,6 +302,9 @@ void LandmineGoodie::doSomething()
 		getWorld()->pickupGoodie('l');
 		Goodie::doSomething();
 	}
+
+	if (get_iTicks() != 0)
+		dec_iTicks();
 }
 
 /**********************************************************************************************************************************************************
@@ -232,9 +319,16 @@ Projectile::~Projectile()
 
 void Projectile::doSomething()
 {
-	if (m_lifespan == 0)
-		setDead();
+	if (getLife() == 0) {
+		kill();
+		return;
+	}
 	decLife();
+}
+
+void Projectile::kill()
+{
+	setDead();
 }
 
 Vomit::~Vomit()
@@ -244,6 +338,10 @@ Vomit::~Vomit()
 
 void Vomit::doSomething()
 {
+	getWorld()->checkOverlap(getX(), getY(), 'v');
+	if (getWorld()->checkOverlapWithPenelope(getX(), getY())) {
+		getWorld()->infectPenelope();
+	}
 	Projectile::doSomething();
 }
 
@@ -254,7 +352,7 @@ Flame::~Flame()
 
 void Flame::doSomething()
 {
-	getWorld()->overlapWithHazard(getX(), getY());
+	getWorld()->checkOverlap(getX(), getY(), 'h');
 	if (getWorld()->checkOverlapWithPenelope(getX(), getY())) {
 		getWorld()->killPenelope();
 	}

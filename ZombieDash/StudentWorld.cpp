@@ -60,6 +60,8 @@ int StudentWorld::init()
 			}
 			case Level::dumb_zombie:
 			{
+				Actor* dumb = new Zombie(this, i * SPRITE_WIDTH, j * SPRITE_HEIGHT);
+				m_actors.push_back(dumb);
 				break;
 			}
 			case Level::player:
@@ -153,7 +155,9 @@ int StudentWorld::move()
 			return GWSTATUS_FINISHED_LEVEL;
 		}
 		checkDead(it);
-		it++;
+		if (it != m_actors.end()) {
+			it++;
+		}
 	}
 	//checkDead();
 	return GWSTATUS_CONTINUE_GAME;
@@ -172,17 +176,17 @@ void StudentWorld::cleanUp()
 	}
 }
 
-void StudentWorld::killActor(Actor* kill)
-{
-	kill->setDead();
-}
-
 void StudentWorld::killPenelope()
 {
-	m_penelope->setDead();
+	m_penelope->kill();
 }
 
-bool StudentWorld::checkForCollisions(int dir, double x, double y) const
+void StudentWorld::infectPenelope()
+{
+	m_penelope->infect();
+}
+
+bool StudentWorld::checkWallCollisions(int dir, double x, double y) const
 {
 	list<Actor*>::const_iterator it;
 	it = m_actors.begin();
@@ -194,7 +198,6 @@ bool StudentWorld::checkForCollisions(int dir, double x, double y) const
 		}
 		double actorX = (*it)->getX();
 		double actorY = (*it)->getY();	
-		double distance = (pow(actorX - x, 2) + pow(actorY - y, 2));
 		switch (dir) {
 		///*
 		case 0: //right
@@ -236,6 +239,23 @@ bool StudentWorld::checkForCollisions(int dir, double x, double y) const
 	return false;
 }
 
+bool StudentWorld::checkFlameCollisions(double x, double y) const
+{
+	list<Actor*>::const_iterator it = m_actors.begin();
+	while (it != m_actors.end()) {
+		if ((*it)->blockFlames()) {
+			double upperBound = (*it)->getY() + SPRITE_HEIGHT;
+			double bottomBound = (*it)->getY() - SPRITE_HEIGHT;
+			double leftBound = (*it)->getX() - SPRITE_WIDTH;
+			double rightBound = (*it)->getX() + SPRITE_WIDTH;
+			if (x >= leftBound && x <= rightBound && y >= bottomBound && y <= upperBound)
+				return true;
+		}
+		it++;
+	}
+	return false;
+}
+
 /*
 void StudentWorld::checkOverlap(double x, double y) const
 {
@@ -256,6 +276,44 @@ void StudentWorld::checkOverlap(double x, double y) const
 }
 */
 
+bool StudentWorld::checkOverlap(double x, double y, char type) {
+	bool result = false;
+	list<Actor*>::iterator it = m_actors.begin();
+	double hDist = 0;
+	double vDist = 0;
+	while (it != m_actors.end())
+	{
+		hDist = ((*it)->getX() - x) * ((*it)->getX() - x);
+		vDist = ((*it)->getY() - y) * ((*it)->getY() - y);
+		if (vDist + hDist <= OVERLAP_DISTANCE) {
+			switch (type) {
+			case 'e':
+				if ((*it)->isInfectable()) {
+					escape(it);
+				}
+				break;
+			case 'h':
+				if ((*it)->isDamageable()) {
+					(*it)->kill();
+				}
+				break;
+			case 'l':
+				if ((*it)->doesMove())
+				return true;
+				break;
+			case 'f':
+				if ((*it)->isDamageable() == false)
+					return true;
+				break;
+			default:
+				break;
+			}
+		}
+		it++;
+	}
+	return false;
+}
+
 bool StudentWorld::checkOverlapWithPenelope(double x, double y) const
 {
 	double hDist = (m_penelope->getX() - x) * (m_penelope->getX() - x);
@@ -264,46 +322,6 @@ bool StudentWorld::checkOverlapWithPenelope(double x, double y) const
 		return true;
 	}
 	return false;
-}
-
-//tests if any citizens overlap with a specified exit, if so, has them escape
-void StudentWorld::overlapWithExit(double x, double y)
-{
-	list<Actor*>::iterator it;
-	it = m_actors.begin();
-	double hDist = 0;
-	double vDist = 0;
-	while (it != m_actors.end())
-	{
-		if ((*it)->isInfectable()) {
-			hDist = ((*it)->getX() - x) * ((*it)->getX() - x);
-			vDist = ((*it)->getY() - y) * ((*it)->getY() - y);
-			if (vDist + hDist <= OVERLAP_DISTANCE) {
-				escape(it);
-				continue;
-			}
-		}
-		it++;
-	}
-}
-
-//checks if any actors overlap with a specified hazard object
-void StudentWorld::overlapWithHazard(double x, double y)
-{
-	list<Actor*>::iterator it = m_actors.begin();
-	double hDist = 0;
-	double vDist = 0;
-	while (it != m_actors.end())
-	{
-		if ((*it)->isDamageable()) {
-			hDist = ((*it)->getX() - x) * ((*it)->getX() - x);
-			vDist = ((*it)->getY() - y) * ((*it)->getY() - y);
-			if (vDist + hDist <= OVERLAP_DISTANCE) {
-				killActor(*it);
-			}
-		}
-		it++;
-	}
 }
 
 //function called whenever a citizen escapes (overlaps with exit)
@@ -332,13 +350,73 @@ void StudentWorld::pickupGoodie(char goodie)
 	}
 }
 
-/*
-void StudentWorld::createZombie(double x, double y)
+void StudentWorld::explode(double x, double y)
 {
-	Actor* zombie = new Zombie(this, x, y);
+	cerr << "explosion" << endl;
+	Actor* landminePit = new Pit(this, x, y);
+	m_actors.push_back(landminePit);
+	createFlame(x + SPRITE_WIDTH, y, 0);
+	createFlame(x - SPRITE_WIDTH, y, 0);
+	createFlame(x, y + SPRITE_HEIGHT, 0);
+	createFlame(x, y - SPRITE_HEIGHT, 0);
+	createFlame(x + SPRITE_WIDTH, y + SPRITE_HEIGHT, 0);
+	createFlame(x + SPRITE_WIDTH, y - SPRITE_HEIGHT, 0);
+	createFlame(x - SPRITE_WIDTH, y + SPRITE_HEIGHT, 0);
+	createFlame(x - SPRITE_WIDTH, y - SPRITE_HEIGHT, 0);
+}
+
+//returns true if created a flame at specified x and y
+bool StudentWorld::createFlame(double x, double y, int dir) 
+{
+	if (checkOverlap(x, y, 'f'))
+		return false;
+	cerr << "Creating a Flame" << endl;
+	Actor* flame = new Flame(this, x, y, dir);
+	m_actors.push_back(flame);
+	return true;
+}
+
+void StudentWorld::shootFlamethrower(int dir)
+{
+	double playerX = m_penelope->getX();
+	double playerY = m_penelope->getY();
+	double flameX = playerX;
+	double flameY = playerY;
+	int i = 1;
+	while (i < 4) {
+		switch (dir) {
+		case 90:
+			flameY = playerY + (i * SPRITE_HEIGHT);
+			break;
+		case 270:
+			flameY = playerY - (i * SPRITE_HEIGHT);
+			break;
+		case 180:
+			flameX = playerX - (i * SPRITE_WIDTH);
+			break;
+		case 0:
+			flameX = playerX + (i * SPRITE_WIDTH);
+			break;
+		default:
+			return;
+		}
+		if (!createFlame(flameX, flameY, dir))
+			break;
+		i++;
+	}
+}
+
+void StudentWorld::deployMine(double x, double y)
+{
+	Actor* landmine = new Landmine(this, x, y);
+	m_actors.push_back(landmine);
+}
+
+void StudentWorld::createZombie(double x, double y, int dir)
+{
+	Actor* zombie = new Zombie(this, x, y, dir);
 	m_actors.push_back(zombie);
 }
-*/
 
 //checks each actor to see if any actors died during the current tick, if so delete them and erase from the list of current actors
 void StudentWorld::checkDead(list<Actor*>::iterator& currIt) {
@@ -346,14 +424,22 @@ void StudentWorld::checkDead(list<Actor*>::iterator& currIt) {
 	it = m_actors.begin();
 	while (it != m_actors.end()) {
 		if ((*it)->isDead()) {
+			//cerr << "before erase (it): " << *it << endl;
+			//cerr << "before erase (currit): " << *currIt << endl;
+			//cerr << "before erase (curr is end): " << (currIt == m_actors.end()) << endl;
 			delete (*it);
-			(*it) = nullptr;
-			list<Actor*>::iterator temp = m_actors.erase(it);
 			if (it == currIt)
-				currIt = temp;
-			it = temp;
-			continue;
+				it = currIt = m_actors.erase(it);
+			else
+				it = m_actors.erase(it);
+			//cerr << "just erased" << endl;
+			//cerr << (it == m_actors.end()) << endl;
+			//cerr << (currIt == m_actors.end()) << endl;
+			//cerr << "after erase (currIt): " << *currIt << endl;
+			//cerr << "after erase (it): " << *it << endl;
 		}
-		it++;
+		else {
+			it++;
+		}
 	}
 }
