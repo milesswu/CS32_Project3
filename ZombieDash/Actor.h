@@ -17,12 +17,10 @@ public:
 
 	virtual void doSomething() = 0;
 	virtual void kill() = 0;
+	virtual void infectInfectable() = 0;
+
 	virtual bool hasCollision()
 	{
-		return false;
-	}
-
-	virtual bool blockFlames() {
 		return false;
 	}
 
@@ -37,6 +35,16 @@ public:
 	}
 
 	virtual bool doesMove()
+	{
+		return false;
+	}
+
+	virtual bool blockFlames()
+	{
+		return false;
+	}
+	
+	virtual bool blockVomit()
 	{
 		return false;
 	}
@@ -72,6 +80,7 @@ class Player : public Actor
 public:
 	Player(StudentWorld* world, int imageID, double startX, double startY, Direction dir = right) : Actor(world, imageID, startX, startY, dir) {}
 	virtual ~Player();
+	virtual bool move(Direction dir, double x, double y);
 
 	virtual bool hasCollision()
 	{
@@ -88,7 +97,11 @@ public:
 		return true;
 	}
 
-	void	move(Direction dir, double x, double y);
+	virtual void infectInfectable()
+	{
+		return;
+	}
+
 private:
 
 };
@@ -103,6 +116,12 @@ public:
 	}
 	virtual ~InfectablePlayer();
 	virtual void doSomething();
+
+	virtual void infectInfectable()
+	{
+		m_isInfected = true;
+	}
+
 	virtual bool isInfectable()
 	{
 		return true;
@@ -123,10 +142,9 @@ public:
 		return m_infectionCount;
 	}
 
-	int incInfection()
+	void incInfection()
 	{
 		m_infectionCount++;
-		return m_infectionCount;
 	}
 
 	void cure()
@@ -229,6 +247,35 @@ public:
 	virtual ~Zombie();
 	virtual void kill();
 	virtual void doSomething();
+	virtual bool move(Direction dir, double x, double y);
+	virtual void changeDirection();
+
+	bool spitVomit();
+
+	bool isParalyzed()
+	{
+		return m_isParalyzed;
+	}
+
+	void changeState()
+	{
+		m_isParalyzed = !m_isParalyzed;
+	}
+
+	int moves()
+	{
+		return m_movePlan;
+	}
+
+	void setMovePlan()
+	{
+		m_movePlan = randInt(3, 10);
+	}
+
+	virtual void infectInfectable()
+	{
+		return;
+	}
 
 private:
 	int		m_movePlan;
@@ -237,23 +284,22 @@ private:
 
 class DumbZombie : public Zombie
 {
+public:
 	DumbZombie(StudentWorld* world, double startX, double startY) : Zombie(world, startX, startY) {}
 	virtual ~DumbZombie();
-
-	virtual void doSomething();
-
 };
 
-/*
+
 class SmartZombie : public Zombie
 {
+public:
 	SmartZombie(StudentWorld* world, double startX, double startY) : Zombie(world, startX, startY) {}
 	virtual ~SmartZombie();
 
 	virtual void doSomething();
-
+	virtual void changeDirection();
 };
-//*/
+
 /**********************************************************************************************************************************************************
 																		ENVIRONMENT OBJECTS
 ***********************************************************************************************************************************************************
@@ -265,6 +311,16 @@ public:
 	Environment(StudentWorld* world, int imageID, double startX, double startY, Direction dir = right, int depth = 0) : Actor(world, imageID, startX, startY, dir, depth) {}
 	virtual ~Environment();
 	virtual void kill() { return; }
+
+	virtual bool blockFlames()
+	{
+		return true;
+	}
+
+	virtual void infectInfectable()
+	{
+		return;
+	}
 };
 
 class Wall : public Environment
@@ -279,7 +335,7 @@ public:
 		return true;
 	}
 
-	virtual bool blockFlames()
+	virtual bool blockVomit()
 	{
 		return true;
 	}
@@ -292,11 +348,6 @@ public:
 	virtual ~Exit();
 
 	virtual void doSomething();
-	virtual bool blockFlames()
-	{
-		return true;
-	}
-
 };
 
 
@@ -305,6 +356,11 @@ class Hazard : public Environment
 public:
 	Hazard(StudentWorld* world, int imageID, double startX, double startY, Direction dir, int depth) : Environment(world, imageID, startX, startY, dir, depth) {}
 	virtual ~Hazard();
+
+	virtual bool blockFlames()
+	{
+		return false;
+	}
 };
 
 
@@ -392,6 +448,11 @@ public:
 		m_iTicks--;
 	}
 
+	virtual void infectInfectable()
+	{
+		return;
+	}
+
 private:
 	int m_iTicks;
 };
@@ -455,6 +516,11 @@ public:
 		m_lifespan--;
 	}
 
+	virtual void infectInfectable()
+	{
+		return;
+	}
+
 private:
 	int m_lifespan;
 };
@@ -466,7 +532,6 @@ public:
 	virtual ~Vomit();
 
 	virtual void doSomething();
-
 };
 
 class Flame : public Projectile

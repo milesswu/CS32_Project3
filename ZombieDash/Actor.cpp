@@ -28,14 +28,16 @@ Player::~Player()
 }
 
 //Helper function to set new direction and location when a Player object moves
-void Player::move(Direction dir, double x, double y)
+bool Player::move(Direction dir, double x, double y)
 {
 	setDirection(dir);
 	//cerr << "Penelope (x, y): (" << getX() << ", " << getY() << ")" << endl;
 	//cerr << "Penelope max(?) (x, y): (" << getX() + SPRITE_WIDTH - 1 << ", " << getY() + SPRITE_HEIGHT - 1 << ")" << endl;
-	if (getWorld()->checkWallCollisions(dir, getX(), getY()))
-		return;
+	if (getWorld()->checkCollisions(dir, getX(), getY(), this))
+		return false;
+	//cerr << "move" << endl;
 	moveTo(x, y);
+	return true;
 }
 
 //InfectablePlayer Destructor
@@ -46,10 +48,12 @@ InfectablePlayer::~InfectablePlayer()
 
 void InfectablePlayer::doSomething()
 {
-	if (incInfection() == 500) {
+	if (infectionCount() == INFECT_LEVEL) {
 		getWorld()->createZombie(getX(), getY(), getDirection());
 		kill();
 	}
+	if (isInfected())
+		incInfection();
 }
 
 /**********************************************************************************************************************************************************
@@ -68,6 +72,7 @@ void Penelope::doSomething()
 {
 	if (isDead())
 		return;
+	InfectablePlayer::doSomething();
 	int keyPress;
 	if (getWorld()->getKey(keyPress)) {
 		switch (keyPress) {
@@ -137,7 +142,97 @@ Zombie::~Zombie()
 
 void Zombie::doSomething()
 {
-	return;
+	if (isParalyzed()) {
+		changeState();
+		return;
+	}
+	changeState();
+	if (spitVomit()) {
+		cerr << "spitting" << endl;
+		return;
+	}
+	if (moves() == 0) {
+		setMovePlan();
+		changeDirection();
+	}
+	int dir = getDirection();
+	double dest_x = getX();
+	double dest_y = getY();
+	switch (dir) {
+	case up:
+		dest_y = getY() + 1;
+		break;
+	case down:
+		dest_y = getY() - 1;
+		break;
+	case right:
+		dest_x = getX() + 1;
+		break;
+	case left:
+		dest_x = getX() - 1;
+		break;
+	default:
+		break;
+	}
+	if (move(dir, dest_x, dest_y)) {
+		m_movePlan--;
+	}
+	else
+		m_movePlan = 0;
+}
+
+bool Zombie::spitVomit()
+{
+	double vomX = getX();
+	double vomY = getY();
+	switch (getDirection()) {
+	case up:
+		vomY = getY() + SPRITE_HEIGHT;
+		break;
+	case down:
+		vomY = getY() - SPRITE_HEIGHT;
+		break;
+	case left:
+		vomX = getX() - SPRITE_WIDTH;
+		break;
+	case right:
+		vomX = getX() + SPRITE_WIDTH;
+		break;
+	default:
+		break;
+	}
+	if (getWorld()->checkOverlap(vomX, vomY, 'z') || getWorld()->checkOverlapWithPenelope(vomX, vomY)) {
+		return getWorld()->createVomit(vomX, vomY, getDirection());
+	}
+	return false;
+}
+
+bool Zombie::move(Direction dir, double x, double y)
+{
+	if (getWorld()->checkCollisionWithPenelope(dir, x, y))
+		return false;
+	Player::move(dir, x, y);
+}
+
+void Zombie::changeDirection()
+{
+	int rand = randInt(1, 4);
+	switch (rand) {
+	case 1:
+		setDirection(up);
+		break;
+	case 2:
+		setDirection(down);
+		break;
+	case 3:
+		setDirection(right);
+		break;
+	case 4:
+		setDirection(left);
+		break;
+	default:
+		break;
+	}
 }
 
 void Zombie::kill()
@@ -150,16 +245,33 @@ void Zombie::kill()
 ***********************************************************************************************************************************************************
 */
 
-
-
+DumbZombie::~DumbZombie()
+{
+	cerr << "Destorying a Dumb Zombie" << endl;
+}
 
 /**********************************************************************************************************************************************************
 																		SMARTZOMBIE MEMBER FUNCTIONS
 ***********************************************************************************************************************************************************
 */
 
+SmartZombie::~SmartZombie()
+{
+	cerr << "Destroying a Smart Zombie" << endl;
+}
 
+void SmartZombie::doSomething()
+{
+	Zombie::doSomething();
+}
 
+void SmartZombie::changeDirection()
+{
+	if (getWorld()->findNearest(getX(), getY(), this)) {
+		return;
+	}
+	Zombie::changeDirection();
+}
 
 /**********************************************************************************************************************************************************
 																	ENVIRONMENT OBJECT IMPLEMENTATIONS
@@ -338,7 +450,7 @@ Vomit::~Vomit()
 
 void Vomit::doSomething()
 {
-	getWorld()->checkOverlap(getX(), getY(), 'v');
+	getWorld()->checkOverlap(getX(), getY(), 'i');
 	if (getWorld()->checkOverlapWithPenelope(getX(), getY())) {
 		getWorld()->infectPenelope();
 	}

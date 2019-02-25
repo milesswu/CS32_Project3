@@ -19,19 +19,24 @@ public:
 	virtual int move();
 	virtual void cleanUp();
 
-	bool	checkWallCollisions(int dir, double x, double y) const;
-	bool	checkFlameCollisions(double x, double y) const;
+	bool	checkCollisions(int dir, double x, double y, Actor* curr) const;
+	bool	checkCollisionWithPenelope(int dir, double x, double y) const;
 	bool	checkOverlap(double x, double y, char type);
 	bool	checkOverlapWithPenelope(double x, double y) const;
 	void	infectPenelope();
 	void	killPenelope();
 	void	escape(std::list<Actor*>::iterator& escapee);
+
+	bool	findNearest(double x, double y, Actor* origin);
+	bool	targetPenelope(double x, double y, double currDist, Actor* origin);
+	void	setClosestDirection(double originX, double originY, double actorX, double actorY, Actor* origin);
 	void	pickupGoodie(char goodie);
-	bool	createFlame(double x, double y, int dir);
-	void	explode(double x, double y);
 	void	shootFlamethrower(int dir);
-	void	deployMine(double x, double y);
+	void	explode(double x, double y);
+	bool	createFlame(double x, double y, int dir);
+	bool	createVomit(double x, double y, int dir);
 	void	createZombie(double x, double y, int dir);
+	void	deployMine(double x, double y);
 
 	void completeLevel()
 	{
@@ -49,8 +54,9 @@ public:
 	}
 
 private:
-	const double		COLLISION_DISTANCE = sqrt(pow(SPRITE_WIDTH, 2) + pow(SPRITE_HEIGHT, 2));
+	const double		COLLISION_DISTANCE = pow(SPRITE_WIDTH, 2) + pow(SPRITE_HEIGHT, 2);
 	const double		OVERLAP_DISTANCE = 100;
+	const double		TARGET_RANGE = 6400;
 	Penelope*			m_penelope;
 	std::list<Actor*>	m_actors;
 	int					m_alive;
