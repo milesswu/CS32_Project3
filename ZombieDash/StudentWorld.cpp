@@ -13,8 +13,6 @@ GameWorld* createStudentWorld(string assetPath)
 	return new StudentWorld(assetPath);
 }
 
-// Students:  Add code to this file, StudentWorld.h, Actor.h and Actor.cpp
-
 StudentWorld::StudentWorld(string assetPath)
 	: GameWorld(assetPath)
 {
@@ -539,19 +537,11 @@ void StudentWorld::checkDead(list<Actor*>::iterator& currIt) {
 	it = m_actors.begin();
 	while (it != m_actors.end()) {
 		if ((*it)->isDead()) {
-			//cerr << "before erase (it): " << *it << endl;
-			//cerr << "before erase (currit): " << *currIt << endl;
-			//cerr << "before erase (curr is end): " << (currIt == m_actors.end()) << endl;
 			delete (*it);
 			if (it == currIt)
 				it = currIt = m_actors.erase(it);
 			else
 				it = m_actors.erase(it);
-			//cerr << "just erased" << endl;
-			//cerr << (it == m_actors.end()) << endl;
-			//cerr << (currIt == m_actors.end()) << endl;
-			//cerr << "after erase (currIt): " << *currIt << endl;
-			//cerr << "after erase (it): " << *it << endl;
 		}
 		else {
 			it++;
