@@ -116,6 +116,7 @@ public:
 	}
 	virtual ~InfectablePlayer();
 	virtual void doSomething();
+	virtual void infect();
 
 	virtual void infectInfectable()
 	{
@@ -132,11 +133,6 @@ public:
 		return m_isInfected;
 	}
 
-	void infect()
-	{
-		m_isInfected = true;
-	}
-
 	int infectionCount()
 	{
 		return m_infectionCount;
@@ -144,7 +140,7 @@ public:
 
 	void incInfection()
 	{
-		m_infectionCount += 500;
+		m_infectionCount++;
 	}
 
 	void cure()
@@ -229,7 +225,6 @@ public:
 	Citizen(StudentWorld* world, double startX, double startY) : InfectablePlayer(world, IID_CITIZEN, startX, startY) 
 	{
 		m_isParalyzed = false;		
-		infect();
 	}
 	virtual ~Citizen();
 	virtual void kill();
@@ -259,6 +254,7 @@ public:
 	{
 		m_movePlan = 0;
 		m_isParalyzed = false;
+		setScore(1000);
 	}
 	virtual ~Zombie();
 	virtual void kill();
@@ -275,6 +271,16 @@ public:
 	void changeState()
 	{
 		m_isParalyzed = !m_isParalyzed;
+	}
+
+	void setScore(int score)
+	{
+		m_score = score;
+	}
+
+	int getScore()
+	{
+		return m_score;
 	}
 
 	int moves()
@@ -295,6 +301,7 @@ public:
 private:
 	int		m_movePlan;
 	bool	m_isParalyzed;
+	int		m_score;
 };
 
 class DumbZombie : public Zombie
@@ -318,7 +325,10 @@ private:
 class SmartZombie : public Zombie
 {
 public:
-	SmartZombie(StudentWorld* world, double startX, double startY, Direction dir = right) : Zombie(world, startX, startY, dir) {}
+	SmartZombie(StudentWorld* world, double startX, double startY, Direction dir = right) : Zombie(world, startX, startY, dir) 
+	{
+		setScore(2000);
+	}
 	virtual ~SmartZombie();
 
 	virtual void doSomething();

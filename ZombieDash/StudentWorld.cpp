@@ -202,98 +202,36 @@ void StudentWorld::infectPenelope()
 	m_penelope->infect();
 }
 
-bool StudentWorld::checkCollisions(int dir, double x, double y, Actor* curr) const
+bool StudentWorld::checkCollisions(double x, double y, Actor* curr) const
 {
 	list<Actor*>::const_iterator it = m_actors.begin();
 	
 	while (it != m_actors.end())
 	{
-		if (((*it)->hasCollision() == false) || ((*it) == curr)) {
+		if (((*it)->hasCollision() == false) || ((*it) == curr)){
 			//cerr << "doesnt" << endl;
 			it++;
 			continue;
 		}
-		//cerr << (*it)->hasCollision() << endl;
-		double actorX = (*it)->getX();
-		double actorY = (*it)->getY();
-
-		switch (dir) {
-		///*
-		case 0: //right
-			if (x + SPRITE_WIDTH >= actorX && x + SPRITE_WIDTH <= actorX + SPRITE_WIDTH - 1 && y <= actorY + SPRITE_HEIGHT - 1 && y + SPRITE_HEIGHT >= actorY) {
-				if (y + SPRITE_HEIGHT <= actorY || y >= actorY + SPRITE_HEIGHT)
-					return false;
-				return true;
-			}
-			break;
-		case 90: //up
-			if (y + SPRITE_HEIGHT >= actorY && y + SPRITE_HEIGHT <= actorY + SPRITE_HEIGHT - 1 && x <= actorX + SPRITE_WIDTH - 1 && x + SPRITE_WIDTH >= actorX) {
-				if (x + SPRITE_WIDTH <= actorX || x >= actorX + SPRITE_WIDTH)
-					return false;
-				return true;
-			}
-			break;
-		case 180: //left
-			if (x <= actorX + SPRITE_WIDTH && x >= actorX && y <= actorY + SPRITE_HEIGHT - 1 && y + SPRITE_HEIGHT >= actorY) {
-				if (y + SPRITE_HEIGHT <= actorY || y >= actorY + SPRITE_HEIGHT)
-					return false;
-				return true;
-			}
-			break;
-		case 270: //down
-			if (y <= actorY + SPRITE_HEIGHT && y >= actorY && x <= actorX + SPRITE_WIDTH - 1 && x + SPRITE_WIDTH >= actorX) {
-				//cerr << "Actor (x, y): (" << actorX << ", " << actorY << ")" << endl;
-				//cerr << "Actor max (x, y): (" << actorX + SPRITE_WIDTH << ", " << actorY + SPRITE_HEIGHT << ")" << endl;
-				if (x + SPRITE_WIDTH <= actorX || x >= actorX + SPRITE_WIDTH)
-					return false;
-				return true;
-			}
-			break;
-		default:
-			break;
-		}
-		//*/
+		double upperBound = (*it)->getY() + SPRITE_HEIGHT;
+		double lowerBound = (*it)->getY() - SPRITE_HEIGHT;
+		double leftBound = (*it)->getX() - SPRITE_WIDTH;
+		double rightBound = (*it)->getX() + SPRITE_WIDTH;
+		if (x > leftBound && x < rightBound && y < upperBound && y > lowerBound)
+			return true;
 		it++;
 	}
 	return false;
 }
 
-bool StudentWorld::checkCollisionWithPenelope(int dir, double x, double y) const
+bool StudentWorld::checkCollisionWithPenelope(double x, double y) const
 {
-	double actorX = m_penelope->getX();
-	double actorY = m_penelope->getY();
-	switch (dir) {
-	case 0: //right
-		if (x + SPRITE_WIDTH >= actorX && x + SPRITE_WIDTH <= actorX + SPRITE_WIDTH - 1 && y <= actorY + SPRITE_HEIGHT - 1 && y + SPRITE_HEIGHT >= actorY) {
-			if (y + SPRITE_HEIGHT <= actorY || y >= actorY + SPRITE_HEIGHT)
-				return false;
-			return true;
-		}
-		break;
-	case 90: //up
-		if (y + SPRITE_HEIGHT >= actorY && y + SPRITE_HEIGHT <= actorY + SPRITE_HEIGHT - 1 && x <= actorX + SPRITE_WIDTH - 1 && x + SPRITE_WIDTH >= actorX) {
-			if (x + SPRITE_WIDTH <= actorX || x >= actorX + SPRITE_WIDTH)
-				return false;
-			return true;
-		}
-		break;
-	case 180: //left
-		if (x <= actorX + SPRITE_WIDTH && x >= actorX && y <= actorY + SPRITE_HEIGHT - 1 && y + SPRITE_HEIGHT >= actorY) {
-			if (y + SPRITE_HEIGHT <= actorY || y >= actorY + SPRITE_HEIGHT)
-				return false;
-			return true;
-		}
-		break;
-	case 270: //down
-		if (y <= actorY + SPRITE_HEIGHT && y >= actorY && x <= actorX + SPRITE_WIDTH - 1 && x + SPRITE_WIDTH >= actorX) {
-			if (x + SPRITE_WIDTH <= actorX || x >= actorX + SPRITE_WIDTH)
-				return false;
-			return true;
-		}
-		break;
-	default:
-		break;
-	}
+	double upperBound = m_penelope->getY() + SPRITE_HEIGHT;
+	double lowerBound = m_penelope->getY() - SPRITE_HEIGHT;
+	double leftBound = m_penelope->getX() - SPRITE_WIDTH;
+	double rightBound = m_penelope->getX() + SPRITE_WIDTH;
+	if (x > leftBound && x < rightBound && y < upperBound && y > lowerBound)
+		return true;
 	return false;
 }
 
@@ -361,6 +299,7 @@ void StudentWorld::escape(list<Actor*>::iterator& escapee)
 {
 	increaseScore(500);
 	decAlive();
+	playSound(SOUND_CITIZEN_SAVED); 
 	(*escapee)->setDead();
 }
 
@@ -490,8 +429,9 @@ void StudentWorld::pickupGoodie(char goodie)
 		m_penelope->incLandmine();
 		break;
 	default:
-		break;
+		return;
 	}
+	playSound(SOUND_GOT_GOODIE);
 }
 
 void StudentWorld::explode(double x, double y)
@@ -554,6 +494,7 @@ void StudentWorld::createZombie(double x, double y, int dir)
 	else
 		zombie = new SmartZombie(this, x, y, dir);
 	m_actors.push_back(zombie);
+	playSound(SOUND_ZOMBIE_BORN);
 }
 
 void StudentWorld::deployMine(double x, double y)

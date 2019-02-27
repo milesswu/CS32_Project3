@@ -31,7 +31,7 @@ Player::~Player()
 bool Player::move(Direction dir, double x, double y)
 {
 	setDirection(dir);
-	if (getWorld()->checkCollisions(dir, getX(), getY(), this) || getWorld()->checkCollisionWithPenelope(dir, getX(), getY()))
+	if (getWorld()->checkCollisions(x, y, this) || getWorld()->checkCollisionWithPenelope(x, y))
 		return false;
 	moveTo(x, y);
 	return true;
@@ -52,6 +52,14 @@ void InfectablePlayer::doSomething()
 	}
 	if (isInfected())
 		incInfection();
+}
+
+void InfectablePlayer::infect()
+{
+	if (m_isInfected == false) {
+		m_isInfected = true;
+		getWorld()->playSound(SOUND_CITIZEN_INFECTED);
+	}
 }
 
 /**********************************************************************************************************************************************************
@@ -103,7 +111,7 @@ void Penelope::doSomething()
 bool Penelope::move(Direction dir, double x, double y)
 {
 	setDirection(dir);
-	if (getWorld()->checkCollisions(dir, getX(), getY(), this))
+	if (getWorld()->checkCollisions(x, y, this))
 		return false;
 	moveTo(x, y);
 	return true;
@@ -115,6 +123,7 @@ void Penelope::shootFlamethrower(Direction dir)
 	if (getGas() <= 0)
 		return;
 	getWorld()->shootFlamethrower(dir);
+	getWorld()->playSound(SOUND_PLAYER_FIRE);
 	m_gasCount--;
 
 }
@@ -129,6 +138,7 @@ void Penelope::deployMine()
 
 void Penelope::kill()
 {
+	getWorld()->playSound(SOUND_PLAYER_DIE);
 	setDead();
 }
 
@@ -154,29 +164,29 @@ void Citizen::doSomething()
 	chooseUp = chooseDown = chooseLeft = chooseRight = 0;
 	double maxDist = 0;
 	Direction newDir = right;
-	if (!getWorld()->checkCollisions(up, getX(), getY(), this) && !getWorld()->checkCollisionWithPenelope(up, getX(), getY())) {
-		chooseUp = getWorld()->findNearestZombie(getX(), getY() + 1);
+	if (!getWorld()->checkCollisions(getX(), getY() + 2, this) && !getWorld()->checkCollisionWithPenelope(getX(), getY() +21)) {
+		chooseUp = getWorld()->findNearestZombie(getX(), getY() + 2);
 		if (chooseUp > maxDist) {
 			maxDist = chooseUp;
 			newDir = up;
 		}
 	}
-	if (!getWorld()->checkCollisions(down, getX(), getY(), this) && !getWorld()->checkCollisionWithPenelope(down, getX(), getY())) {
-		chooseDown = getWorld()->findNearestZombie(getX(), getY() - 1);
+	if (!getWorld()->checkCollisions(getX(), getY() - 2, this) && !getWorld()->checkCollisionWithPenelope(getX(), getY() - 2)) {
+		chooseDown = getWorld()->findNearestZombie(getX(), getY() - 2);
 		if (chooseDown > maxDist) {
 			maxDist = chooseDown;
 			newDir = down;
 		}
 	}
-	if (!getWorld()->checkCollisions(left, getX(), getY(), this) && !getWorld()->checkCollisionWithPenelope(left, getX(), getY())) {
-		chooseLeft = getWorld()->findNearestZombie(getX() - 1, getY());
+	if (!getWorld()->checkCollisions(getX() - 2, getY(), this) && !getWorld()->checkCollisionWithPenelope(getX() - 2, getY())) {
+		chooseLeft = getWorld()->findNearestZombie(getX() - 2, getY());
 		if (chooseLeft > maxDist) {
 			maxDist = chooseLeft;
 			newDir = left;
 		}
 	}
-	if (!getWorld()->checkCollisions(right, getX(), getY(), this) && !getWorld()->checkCollisionWithPenelope(right, getX(), getY())) {
-		chooseRight = getWorld()->findNearestZombie(getX() + 1, getY());
+	if (!getWorld()->checkCollisions(getX() + 2, getY(), this) && !getWorld()->checkCollisionWithPenelope(getX() + 2, getY())) {
+		chooseRight = getWorld()->findNearestZombie(getX() + 2, getY());
 		if (chooseRight > maxDist) {
 			maxDist = chooseRight;
 			newDir = right;
@@ -210,6 +220,7 @@ void Citizen::kill()
 {
 	getWorld()->increaseScore(-1000);
 	getWorld()->decAlive();
+	getWorld()->playSound(SOUND_CITIZEN_DIE);
 	setDead();
 }
 
@@ -313,7 +324,8 @@ void Zombie::changeDirection()
 
 void Zombie::kill()
 {
-	getWorld()->increaseScore(1000);
+	getWorld()->increaseScore(getScore());
+	getWorld()->playSound(SOUND_ZOMBIE_DIE);
 	setDead();
 }
 /**********************************************************************************************************************************************************
@@ -451,6 +463,7 @@ void Landmine::doSomething()
 void Landmine::kill()
 {
 	getWorld()->explode(getX(), getY());
+	getWorld()->playSound(SOUND_LANDMINE_EXPLODE);
 	setDead();
 }
 

@@ -19,8 +19,8 @@ public:
 	virtual int move();
 	virtual void cleanUp();
 
-	bool	checkCollisions(int dir, double x, double y, Actor* curr) const;
-	bool	checkCollisionWithPenelope(int dir, double x, double y) const;
+	bool	checkCollisions(double x, double y, Actor* curr) const;
+	bool	checkCollisionWithPenelope(double x, double y) const;
 	bool	checkOverlap(double x, double y, char type);
 	bool	checkOverlapWithPenelope(double x, double y) const;
 	void	infectPenelope();
@@ -45,6 +45,7 @@ public:
 	void completeLevel()
 	{
 		m_completeLevel = true;
+		playSound(SOUND_LEVEL_FINISHED);
 	}
 
 	int leftAlive()
