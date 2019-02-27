@@ -19,28 +19,37 @@ public:
 	virtual int move();
 	virtual void cleanUp();
 
+	//functions called with every class to test for overlap and collision
 	bool	checkCollisions(double x, double y, Actor* curr) const;
-	bool	checkCollisionWithPenelope(double x, double y) const;
 	bool	checkOverlap(double x, double y, char type);
+	bool	checkCollisionWithPenelope(double x, double y) const;
 	bool	checkOverlapWithPenelope(double x, double y) const;
+
+	//functions to handle specific behaviors with penelope and citizens
 	void	infectPenelope();
 	void	killPenelope();
 	void	escape(std::list<Actor*>::iterator& escapee);
-
+	
+	//functions used for 'AI,' targeting nearest actors (used for citizen and smart zombies)
 	bool	findNearestCitizen(double x, double y, Actor* origin);
 	double	findNearestZombie(double x, double y);
 	bool	targetPenelope(double x, double y, double currDist, Actor* origin);
-	double	distanceToPenelope(double x, double y) const;
 	void	setClosestDirection(double actorX, double actorY, Actor* origin);
 
+	//functions used by penelope specifically
 	void	pickupGoodie(char goodie);
 	void	shootFlamethrower(int dir);
-	void	explode(double x, double y);
+
+	//functions that handle manipulation of student world's objects
 	bool	createFlame(double x, double y, int dir);
 	bool	createVomit(double x, double y, int dir);
 	void	createZombie(double x, double y, int dir);
 	bool	createVaccine(double x, double y);
 	void	deployMine(double x, double y);
+	void	explode(double x, double y);
+
+	double	distanceToPenelope(double x, double y) const;
+
 
 	void completeLevel()
 	{
