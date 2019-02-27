@@ -27,15 +27,19 @@ public:
 	void	killPenelope();
 	void	escape(std::list<Actor*>::iterator& escapee);
 
-	bool	findNearest(double x, double y, Actor* origin);
+	bool	findNearestCitizen(double x, double y, Actor* origin);
+	double	findNearestZombie(double x, double y);
 	bool	targetPenelope(double x, double y, double currDist, Actor* origin);
-	void	setClosestDirection(double originX, double originY, double actorX, double actorY, Actor* origin);
+	double	distanceToPenelope(double x, double y) const;
+	void	setClosestDirection(double actorX, double actorY, Actor* origin);
+
 	void	pickupGoodie(char goodie);
 	void	shootFlamethrower(int dir);
 	void	explode(double x, double y);
 	bool	createFlame(double x, double y, int dir);
 	bool	createVomit(double x, double y, int dir);
 	void	createZombie(double x, double y, int dir);
+	bool	createVaccine(double x, double y);
 	void	deployMine(double x, double y);
 
 	void completeLevel()

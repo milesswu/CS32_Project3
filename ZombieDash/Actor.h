@@ -144,7 +144,7 @@ public:
 
 	void incInfection()
 	{
-		m_infectionCount++;
+		m_infectionCount += 500;
 	}
 
 	void cure()
@@ -171,6 +171,7 @@ public:
 	}
 	virtual ~Penelope();
 	virtual void doSomething();
+	virtual bool move(Direction dir, double x, double y);
 	virtual void kill();
 
 	void shootFlamethrower(Direction dir);
@@ -222,18 +223,33 @@ private:
 	int m_landmineCount;
 };
 
-/*
 class Citizen : public InfectablePlayer
 {
 public:
-	Citizen(StudentWorld* world, double startX, double startY) : InfectablePlayer(world, IID_CITIZEN, startX, startY) {}
+	Citizen(StudentWorld* world, double startX, double startY) : InfectablePlayer(world, IID_CITIZEN, startX, startY) 
+	{
+		m_isParalyzed = false;		
+		infect();
+	}
 	virtual ~Citizen();
+	virtual void kill();
 
 	virtual void doSomething();
+
+	bool isParalyzed()
+	{
+		return m_isParalyzed;
+	}
+
+	void changeState()
+	{
+		m_isParalyzed = !m_isParalyzed;
+	}
 
 private:
 	bool m_isParalyzed;
 };
+
 //*/
 
 class Zombie : public Player
@@ -247,7 +263,6 @@ public:
 	virtual ~Zombie();
 	virtual void kill();
 	virtual void doSomething();
-	virtual bool move(Direction dir, double x, double y);
 	virtual void changeDirection();
 
 	bool spitVomit();
@@ -285,15 +300,25 @@ private:
 class DumbZombie : public Zombie
 {
 public:
-	DumbZombie(StudentWorld* world, double startX, double startY) : Zombie(world, startX, startY) {}
+	DumbZombie(StudentWorld* world, double startX, double startY, Direction dir = right) : Zombie(world, startX, startY, dir) 
+	{
+		if (randInt(1, 10) == 1)
+			m_hasVaccine = true;
+		else
+			m_hasVaccine = false;
+	}
 	virtual ~DumbZombie();
+	virtual void kill();
+
+private:
+	bool m_hasVaccine;
 };
 
 
 class SmartZombie : public Zombie
 {
 public:
-	SmartZombie(StudentWorld* world, double startX, double startY) : Zombie(world, startX, startY) {}
+	SmartZombie(StudentWorld* world, double startX, double startY, Direction dir = right) : Zombie(world, startX, startY, dir) {}
 	virtual ~SmartZombie();
 
 	virtual void doSomething();

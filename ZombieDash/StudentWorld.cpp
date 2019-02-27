@@ -33,7 +33,7 @@ StudentWorld::~StudentWorld()
 int StudentWorld::init()
 {
 	Level lev(assetPath());
-	int levNum = getLevel();
+	int levNum = getLevel(); //TODO
 	ostringstream oss;
 	oss.fill('0');
 	oss << "level" << setw(2) << levNum << ".txt";
@@ -79,7 +79,11 @@ int StudentWorld::init()
 			}
 			case Level::citizen:
 			{
-				//m_alive++;
+				m_alive++;
+				cerr << "Creating a Citizen" << endl;
+				Actor* citizen = new Citizen(this, i * SPRITE_WIDTH, j * SPRITE_HEIGHT);
+				m_actors.push_back(citizen);
+				break;
 			}
 			case Level::exit:
 			{
@@ -125,13 +129,18 @@ int StudentWorld::init()
 			}
 		}
 	}
+	cerr << "Citizens to save: " << m_alive << endl;
 	return GWSTATUS_CONTINUE_GAME;
 }
 
 int StudentWorld::move()
 {
 	ostringstream oss;
-	oss.fill('0');
+
+	if (getScore() < 0)
+		oss.fill(' ');
+	else
+		oss.fill('0');
 	oss << "Score: " << setw(6) << getScore();
 	oss.fill(' ');
 	oss << "  Level: " << getLevel() 
@@ -199,10 +208,12 @@ bool StudentWorld::checkCollisions(int dir, double x, double y, Actor* curr) con
 	
 	while (it != m_actors.end())
 	{
-		if (!((*it)->hasCollision()) || ((*it) == curr)) {
+		if (((*it)->hasCollision() == false) || ((*it) == curr)) {
+			//cerr << "doesnt" << endl;
 			it++;
 			continue;
 		}
+		//cerr << (*it)->hasCollision() << endl;
 		double actorX = (*it)->getX();
 		double actorY = (*it)->getY();
 
@@ -287,7 +298,6 @@ bool StudentWorld::checkCollisionWithPenelope(int dir, double x, double y) const
 }
 
 bool StudentWorld::checkOverlap(double x, double y, char type) {
-	bool result = false;
 	list<Actor*>::iterator it = m_actors.begin();
 	double hDist = 0;
 	double vDist = 0;
@@ -329,7 +339,7 @@ bool StudentWorld::checkOverlap(double x, double y, char type) {
 				}
 				break;
 			default:
-				break;
+				return true;
 			}
 		}
 		it++;
@@ -339,9 +349,8 @@ bool StudentWorld::checkOverlap(double x, double y, char type) {
 
 bool StudentWorld::checkOverlapWithPenelope(double x, double y) const
 {
-	double hDist = (m_penelope->getX() - x) * (m_penelope->getX() - x);
-	double vDist = (m_penelope->getY() - y) * (m_penelope->getY() - y);
-	if (vDist + hDist <= OVERLAP_DISTANCE) {
+	double pDist = distanceToPenelope(x, y);
+	if (pDist <= OVERLAP_DISTANCE) {
 		return true;
 	}
 	return false;
@@ -351,11 +360,11 @@ bool StudentWorld::checkOverlapWithPenelope(double x, double y) const
 void StudentWorld::escape(list<Actor*>::iterator& escapee)
 {
 	increaseScore(500);
-	m_alive--;
+	decAlive();
 	(*escapee)->setDead();
 }
 
-bool StudentWorld::findNearest(double x, double y, Actor* origin) 
+bool StudentWorld::findNearestCitizen(double x, double y, Actor* origin) 
 {
 	double mDist = 6400;
 	double actorX = 0;
@@ -370,15 +379,10 @@ bool StudentWorld::findNearest(double x, double y, Actor* origin)
 		actorY = (*it)->getY();
 		hDist = ((actorX - x) * (actorX - x));
 		vDist = ((actorY - y) * (actorY - y));
-		if (origin->isInfectable()) {
-			continue;
-		}
-		else {
-			if ((*it)->isInfectable()) {
-				if (hDist + vDist <= TARGET_RANGE && hDist + vDist <= mDist) {
-					mDist = hDist + vDist;
-					targetActor = (*it);
-				}
+		if ((*it)->isInfectable()) {
+			if (hDist + vDist <= TARGET_RANGE && hDist + vDist <= mDist) {
+				mDist = hDist + vDist;
+				targetActor = (*it);
 			}
 		}
 		it++;
@@ -389,24 +393,50 @@ bool StudentWorld::findNearest(double x, double y, Actor* origin)
 	if (targetActor == nullptr) {
 		return false;
 	}
-	setClosestDirection(x, y, targetActor->getX(), targetActor->getY(), origin);
+	setClosestDirection(targetActor->getX(), targetActor->getY(), origin);
 	return true;
 }
 
+double StudentWorld::findNearestZombie(double x, double y) 
+{
+	double mDist = 6401;
+	double actorX = 0;
+	double actorY = 0;
+	double hDist = 0;
+	double vDist = 0;
+	Actor* targetActor = nullptr;
+	list<Actor*>::iterator it = m_actors.begin();
+	while (it != m_actors.end())
+	{
+		actorX = (*it)->getX();
+		actorY = (*it)->getY();
+		hDist = ((actorX - x) * (actorX - x));
+		vDist = ((actorY - y) * (actorY - y));
+		if ((*it)->doesMove() && (!(*it)->isInfectable())) {
+			if (hDist + vDist <= TARGET_RANGE && hDist + vDist <= mDist) {
+				mDist = hDist + vDist;
+				targetActor = (*it);
+			}
+		}
+		it++;
+	}
+	return mDist;
+}
 bool StudentWorld::targetPenelope(double x, double y, double currDist, Actor* origin) 
 {
-	double pxDist = (m_penelope->getX() - x) * (m_penelope->getX() - x);
-	double pyDist = (m_penelope->getY() - y) * (m_penelope->getY() - y);
-	if (pxDist + pyDist <= TARGET_RANGE && pxDist + pyDist <= currDist) {
-		setClosestDirection(x, y, m_penelope->getX(), m_penelope->getY(), origin);
+	double pDist = distanceToPenelope(x, y);
+	if (pDist <= TARGET_RANGE && pDist <= currDist) {
+			setClosestDirection(m_penelope->getX(), m_penelope->getY(), origin);
 		return true;
 	}
 	return false;
 }
 
-void StudentWorld::setClosestDirection(double originX, double originY, double actorX, double actorY, Actor* origin)
+void StudentWorld::setClosestDirection(double actorX, double actorY, Actor* origin)
 {
 	//cerr << "setting direction" << endl;
+	double originX = origin->getX();
+	double originY = origin->getY();
 	if (originX == actorX) {
 		if (originY <= actorY)
 			origin->setDirection(90);
@@ -438,6 +468,14 @@ void StudentWorld::setClosestDirection(double originX, double originY, double ac
 	}
 	return;
 }
+
+double StudentWorld::distanceToPenelope(double x, double y) const
+{
+	double pxDist = (m_penelope->getX() - x) * (m_penelope->getX() - x);
+	double pyDist = (m_penelope->getY() - y) * (m_penelope->getY() - y);
+	return pxDist + pyDist;
+}
+
 //function called whenever penelope overlaps with a goodie
 void StudentWorld::pickupGoodie(char goodie)
 {
@@ -470,6 +508,18 @@ void StudentWorld::explode(double x, double y)
 	createFlame(x - SPRITE_WIDTH, y + SPRITE_HEIGHT, 90);
 	createFlame(x - SPRITE_WIDTH, y - SPRITE_HEIGHT, 90);
 }
+//
+
+//returns true if successfully created a vaccine at x and y
+bool StudentWorld::createVaccine(double x, double y)
+{
+	if (checkOverlap(x, y, 'a') || checkOverlapWithPenelope(x, y))
+		return false;
+	cerr << "Creating a Vaccine" << endl;
+	Actor* vacc = new VaccineGoodie(this, x, y);
+	m_actors.push_back(vacc);
+	return true;
+}
 
 //returns true if created a flame at specified x and y
 bool StudentWorld::createFlame(double x, double y, int dir) 
@@ -496,7 +546,13 @@ bool StudentWorld::createVomit(double x, double y, int dir)
 
 void StudentWorld::createZombie(double x, double y, int dir)
 {
-	Actor* zombie = new Zombie(this, x, y, dir);
+	cerr << "Zombie Born" << endl;
+	Actor* zombie = nullptr;
+	int random = randInt(1, 10);
+	if (random > 3 && random <= 10)
+		zombie = new DumbZombie(this, x, y, dir);
+	else
+		zombie = new SmartZombie(this, x, y, dir);
 	m_actors.push_back(zombie);
 }
 

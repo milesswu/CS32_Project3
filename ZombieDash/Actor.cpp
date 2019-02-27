@@ -31,11 +31,8 @@ Player::~Player()
 bool Player::move(Direction dir, double x, double y)
 {
 	setDirection(dir);
-	//cerr << "Penelope (x, y): (" << getX() << ", " << getY() << ")" << endl;
-	//cerr << "Penelope max(?) (x, y): (" << getX() + SPRITE_WIDTH - 1 << ", " << getY() + SPRITE_HEIGHT - 1 << ")" << endl;
-	if (getWorld()->checkCollisions(dir, getX(), getY(), this))
+	if (getWorld()->checkCollisions(dir, getX(), getY(), this) || getWorld()->checkCollisionWithPenelope(dir, getX(), getY()))
 		return false;
-	//cerr << "move" << endl;
 	moveTo(x, y);
 	return true;
 }
@@ -51,6 +48,7 @@ void InfectablePlayer::doSomething()
 	if (infectionCount() == INFECT_LEVEL) {
 		getWorld()->createZombie(getX(), getY(), getDirection());
 		kill();
+		return;
 	}
 	if (isInfected())
 		incInfection();
@@ -101,6 +99,17 @@ void Penelope::doSomething()
 	}
 }
 
+
+bool Penelope::move(Direction dir, double x, double y)
+{
+	setDirection(dir);
+	if (getWorld()->checkCollisions(dir, getX(), getY(), this))
+		return false;
+	moveTo(x, y);
+	return true;
+}
+
+
 void Penelope::shootFlamethrower(Direction dir)
 {
 	if (getGas() <= 0)
@@ -128,6 +137,81 @@ void Penelope::kill()
 ***********************************************************************************************************************************************************
 */
 
+Citizen::~Citizen()
+{
+	cerr << "Destroying a Citizen" << endl;
+}
+
+void Citizen::doSomething()
+{
+	InfectablePlayer::doSomething();
+	if (isParalyzed()) {
+		changeState();
+		return;
+	}
+	changeState();
+	double chooseUp, chooseDown, chooseLeft, chooseRight;
+	chooseUp = chooseDown = chooseLeft = chooseRight = 0;
+	double maxDist = 0;
+	Direction newDir = right;
+	if (!getWorld()->checkCollisions(up, getX(), getY(), this) && !getWorld()->checkCollisionWithPenelope(up, getX(), getY())) {
+		chooseUp = getWorld()->findNearestZombie(getX(), getY() + 1);
+		if (chooseUp > maxDist) {
+			maxDist = chooseUp;
+			newDir = up;
+		}
+	}
+	if (!getWorld()->checkCollisions(down, getX(), getY(), this) && !getWorld()->checkCollisionWithPenelope(down, getX(), getY())) {
+		chooseDown = getWorld()->findNearestZombie(getX(), getY() - 1);
+		if (chooseDown > maxDist) {
+			maxDist = chooseDown;
+			newDir = down;
+		}
+	}
+	if (!getWorld()->checkCollisions(left, getX(), getY(), this) && !getWorld()->checkCollisionWithPenelope(left, getX(), getY())) {
+		chooseLeft = getWorld()->findNearestZombie(getX() - 1, getY());
+		if (chooseLeft > maxDist) {
+			maxDist = chooseLeft;
+			newDir = left;
+		}
+	}
+	if (!getWorld()->checkCollisions(right, getX(), getY(), this) && !getWorld()->checkCollisionWithPenelope(right, getX(), getY())) {
+		chooseRight = getWorld()->findNearestZombie(getX() + 1, getY());
+		if (chooseRight > maxDist) {
+			maxDist = chooseRight;
+			newDir = right;
+		}
+	}
+	double pDist = getWorld()->distanceToPenelope(getX(), getY());
+	if (getWorld()->targetPenelope(getX(), getY(), maxDist, this)) {
+		newDir = getDirection();
+	}
+	else if (maxDist > 6400)
+		return;
+	switch (newDir) {
+	case up:
+		if (move(up, getX(), getY() + 2))
+		break;
+	case down:
+		if (move(down, getX(), getY() - 2))
+		break;
+	case right:
+		if (move(right, getX() + 2, getY()))
+		break;
+	case left:
+		if (move(left, getX() - 2, getY()))
+		break;
+	default:
+		break;
+	}
+}
+
+void Citizen::kill()
+{
+	getWorld()->increaseScore(-1000);
+	getWorld()->decAlive();
+	setDead();
+}
 
 
 /**********************************************************************************************************************************************************
@@ -148,7 +232,6 @@ void Zombie::doSomething()
 	}
 	changeState();
 	if (spitVomit()) {
-		cerr << "spitting" << endl;
 		return;
 	}
 	if (moves() == 0) {
@@ -207,13 +290,6 @@ bool Zombie::spitVomit()
 	return false;
 }
 
-bool Zombie::move(Direction dir, double x, double y)
-{
-	if (getWorld()->checkCollisionWithPenelope(dir, x, y))
-		return false;
-	Player::move(dir, x, y);
-}
-
 void Zombie::changeDirection()
 {
 	int rand = randInt(1, 4);
@@ -250,6 +326,34 @@ DumbZombie::~DumbZombie()
 	cerr << "Destorying a Dumb Zombie" << endl;
 }
 
+void DumbZombie::kill()
+{
+	if (m_hasVaccine) {
+		int dir = randInt(1, 4);
+		double destx = getX();
+		double desty = getY();
+		switch (dir) {
+		case 1: //right
+			destx = getX() + SPRITE_WIDTH;
+			break;
+		case 2: //left
+			destx = getX() - SPRITE_WIDTH;
+			break;
+		case 3: //up
+			desty = getY() + SPRITE_HEIGHT;
+			break;
+		case 4: //down
+			desty = getY() - SPRITE_HEIGHT;
+			break;
+		default:
+			break;
+		}
+		cerr << "try to make a vaccine" << endl;
+		getWorld()->createVaccine(destx, desty);
+	}
+	Zombie::kill();
+}
+
 /**********************************************************************************************************************************************************
 																		SMARTZOMBIE MEMBER FUNCTIONS
 ***********************************************************************************************************************************************************
@@ -267,7 +371,7 @@ void SmartZombie::doSomething()
 
 void SmartZombie::changeDirection()
 {
-	if (getWorld()->findNearest(getX(), getY(), this)) {
+	if (getWorld()->findNearestCitizen(getX(), getY(), this)) {
 		return;
 	}
 	Zombie::changeDirection();
