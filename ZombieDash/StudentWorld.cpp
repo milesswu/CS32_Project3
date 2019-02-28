@@ -46,6 +46,7 @@ int StudentWorld::init()
 	{
 		cerr << "Successfully loaded level" << endl;
 	}
+	m_alive = 0;
 	for (int i = 0; i < LEVEL_HEIGHT; i++) {
 		for (int j = 0; j < LEVEL_WIDTH; j++) {
 			Level::MazeEntry entry = lev.getContentsOf(i, j);
