@@ -17,7 +17,11 @@ public:
 
 	virtual void doSomething() = 0;
 	virtual void kill() = 0; //called whenever an object is killed
-	virtual void infectInfectable() = 0;
+
+	virtual void infectInfectable()
+	{
+		return;
+	}
 
 	virtual bool hasCollision()
 	{
@@ -95,11 +99,6 @@ public:
 	virtual bool doesMove()
 	{
 		return true;
-	}
-
-	virtual void infectInfectable()
-	{
-		return;
 	}
 };
 
@@ -288,11 +287,6 @@ public:
 		m_movePlan = randInt(3, 10);
 	}
 
-	virtual void infectInfectable()
-	{
-		return;
-	}
-
 private:
 	int		m_movePlan;
 	bool	m_isParalyzed;
@@ -345,11 +339,6 @@ public:
 	virtual bool blockFlames()
 	{
 		return true;
-	}
-
-	virtual void infectInfectable()
-	{
-		return;
 	}
 };
 
@@ -478,11 +467,6 @@ public:
 		m_iTicks--;
 	}
 
-	virtual void infectInfectable()
-	{
-		return;
-	}
-
 private:
 	int m_iTicks;
 };
@@ -544,11 +528,6 @@ public:
 	void decLife()
 	{
 		m_lifespan--;
-	}
-
-	virtual void infectInfectable()
-	{
-		return;
 	}
 
 private:

@@ -27,7 +27,7 @@ public:
 	//functions to handle specific behaviors with penelope and citizens
 	void	infectPenelope();
 	void	killPenelope();
-	void	escape(std::list<Actor*>::iterator& escapee);
+	void	escape(Actor* escapee);
 	
 	//functions used for 'AI,' targeting nearest actors (used for citizen and smart zombies)
 	bool	findNearestInfectable(double x, double y, Actor* origin);

@@ -253,7 +253,7 @@ bool StudentWorld::checkOverlap(double x, double y, char type) {
 			switch (type) {
 			case 'e':
 				if ((*it)->isInfectable()) {
-					escape(it);
+					escape(*it);
 				}
 				break;
 			case 'h':
@@ -266,7 +266,7 @@ bool StudentWorld::checkOverlap(double x, double y, char type) {
 				return true;
 				break;
 			case 'f':
-				if ((*it)->blockFlames())
+				if ((*it)->blockFlames()) 
 					return true;
 				break;
 			case 'v':
@@ -283,9 +283,9 @@ bool StudentWorld::checkOverlap(double x, double y, char type) {
 				}
 				break;
 			default:
+				return true;
 				break;
 			}
-			return true;
 		}
 		it++;
 	}
@@ -303,12 +303,12 @@ bool StudentWorld::checkOverlapWithPenelope(double x, double y) const
 }
 
 //function called whenever a citizen escapes (overlaps with exit)
-void StudentWorld::escape(list<Actor*>::iterator& escapee)
+void StudentWorld::escape(Actor* escapee)
 {
 	increaseScore(500);
 	decAlive();
 	playSound(SOUND_CITIZEN_SAVED); 
-	(*escapee)->setDead();
+	escapee->setDead();
 }
 
 //finds nearest infectable actor to origin actor, sets origin actor's direction to the direction that gets them closer to nearest infectable actor
@@ -543,7 +543,7 @@ void StudentWorld::shootFlamethrower(int dir)
 		default:
 			return;
 		}
-		if (!createFlame(flameX, flameY, dir))
+		if (createFlame(flameX, flameY, dir) == false)
 			break;
 		i++;
 	}

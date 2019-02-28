@@ -47,8 +47,6 @@ InfectablePlayer::~InfectablePlayer()
 //handles infection status
 void InfectablePlayer::doSomething()
 {
-	if (isDead())
-		return;
 	if (infectionCount() == INFECT_LEVEL) {
 		getWorld()->createZombie(getX(), getY(), getDirection());
 		kill();
