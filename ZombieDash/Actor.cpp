@@ -17,7 +17,7 @@ Actor::~Actor()
 
 
 /**********************************************************************************************************************************************************
-																		PLAYER MEMBER FUNCTIONS
+																	PLAYER/INFECTABLE PLAYER MEMBER FUNCTIONS
 ***********************************************************************************************************************************************************
 */
 
@@ -31,6 +31,7 @@ Player::~Player()
 bool Player::move(Direction dir, double x, double y)
 {
 	setDirection(dir);
+	//only move if actor woould not collide with some other object with collsions
 	if (getWorld()->checkCollisions(x, y, this) || getWorld()->checkCollisionWithPenelope(x, y))
 		return false;
 	moveTo(x, y);
@@ -43,8 +44,11 @@ InfectablePlayer::~InfectablePlayer()
 	cerr << "Destroying Infectable Player Object" << endl;
 }
 
+//handles infection status
 void InfectablePlayer::doSomething()
 {
+	if (isDead())
+		return;
 	if (infectionCount() == INFECT_LEVEL) {
 		getWorld()->createZombie(getX(), getY(), getDirection());
 		kill();
@@ -54,6 +58,7 @@ void InfectablePlayer::doSomething()
 		incInfection();
 }
 
+//infect an infectable player
 void InfectablePlayer::infect()
 {
 	if (m_isInfected == false) {
@@ -107,7 +112,7 @@ void Penelope::doSomething()
 	}
 }
 
-
+//overloaded move function; does not check collisions with penelope
 bool Penelope::move(Direction dir, double x, double y)
 {
 	setDirection(dir);
@@ -296,7 +301,8 @@ bool Zombie::spitVomit()
 		break;
 	}
 	if (getWorld()->checkOverlap(vomX, vomY, 'z') || getWorld()->checkOverlapWithPenelope(vomX, vomY)) {
-		return getWorld()->createVomit(vomX, vomY, getDirection());
+		if (randInt(1, 3) == 1)
+			return getWorld()->createVomit(vomX, vomY, getDirection());
 	}
 	return false;
 }
@@ -383,7 +389,7 @@ void SmartZombie::doSomething()
 
 void SmartZombie::changeDirection()
 {
-	if (getWorld()->findNearestCitizen(getX(), getY(), this)) {
+	if (getWorld()->findNearestInfectable(getX(), getY(), this)) {
 		return;
 	}
 	Zombie::changeDirection();

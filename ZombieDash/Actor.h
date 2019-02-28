@@ -16,7 +16,7 @@ public:
 	virtual ~Actor();
 
 	virtual void doSomething() = 0;
-	virtual void kill() = 0;
+	virtual void kill() = 0; //called whenever an object is killed
 	virtual void infectInfectable() = 0;
 
 	virtual bool hasCollision()
@@ -101,9 +101,6 @@ public:
 	{
 		return;
 	}
-
-private:
-
 };
 
 class InfectablePlayer : public Player
@@ -210,8 +207,6 @@ public:
 			m_vaccineCount--;
 		}
 	}
-
-
 
 private:
 	int	m_vaccineCount;

@@ -6,7 +6,6 @@
 #include <list>
 #include <cmath>
 
-// Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
 class Actor;
 class Penelope;
 
@@ -31,7 +30,7 @@ public:
 	void	escape(std::list<Actor*>::iterator& escapee);
 	
 	//functions used for 'AI,' targeting nearest actors (used for citizen and smart zombies)
-	bool	findNearestCitizen(double x, double y, Actor* origin);
+	bool	findNearestInfectable(double x, double y, Actor* origin);
 	double	findNearestZombie(double x, double y);
 	bool	targetPenelope(double x, double y, double currDist, Actor* origin);
 	void	setClosestDirection(double actorX, double actorY, Actor* origin);
@@ -50,33 +49,35 @@ public:
 
 	double	distanceToPenelope(double x, double y) const;
 
-
+	//called whenever penelope overlaps with an exit and no citizens need to be saved
 	void completeLevel()
 	{
 		m_completeLevel = true;
 		playSound(SOUND_LEVEL_FINISHED);
 	}
 
+	//accessor to nuber of citizens still needed to save
 	int leftAlive()
 	{
 		return m_alive;
 	}
 
+	//mutator to decrease nuber of alive citizens (called whenever a citizen is saved or dies)
 	void decAlive()
 	{
 		m_alive--;
 	}
 
 private:
-	const double		COLLISION_DISTANCE = pow(SPRITE_WIDTH, 2) + pow(SPRITE_HEIGHT, 2);
-	const double		OVERLAP_DISTANCE = 100;
-	const double		TARGET_RANGE = 6400;
+	const double		OVERLAP_DISTANCE = 100;	//max distance between two objects for them to be overlapping
+	const double		TARGET_RANGE = 6400;	//max distance for citizens or smart zombies to recognize a target actor
 	Penelope*			m_penelope;
 	std::list<Actor*>	m_actors;
 	int					m_alive;
 	bool				m_victory;
 	bool				m_completeLevel;
 
+	//checks for all dead actors in list, deletes any that are dead
 	void checkDead(std::list<Actor*>::iterator& currIt);
 };
 

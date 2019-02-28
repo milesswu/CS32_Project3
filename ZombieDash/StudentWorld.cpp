@@ -106,18 +106,21 @@ int StudentWorld::init()
 			}
 			case Level::vaccine_goodie:
 			{
+				cerr << "Creating a Vaccine" << endl;
 				Actor* vGoodie = new VaccineGoodie(this, i * SPRITE_WIDTH, j* SPRITE_HEIGHT);
 				m_actors.push_back(vGoodie);
 				break;
 			}
 			case Level::gas_can_goodie:
 			{
+				cerr << "Creating a Gas Can Goodie" << endl;
 				Actor* gGoodie = new GasCanGoodie(this, i * SPRITE_WIDTH, j* SPRITE_HEIGHT);
 				m_actors.push_back(gGoodie);
 				break;
 			}
 			case Level::landmine_goodie:
 			{
+				cerr << "Creating a Landmine Goodie" << endl;
 				Actor* lGoodie = new LandmineGoodie(this, i * SPRITE_WIDTH, j* SPRITE_HEIGHT);
 				m_actors.push_back(lGoodie);
 				break;
@@ -149,6 +152,8 @@ int StudentWorld::move()
 		<< "  Infected: " << m_penelope->infectionCount()
 		<< endl;
 	setGameStatText(oss.str());
+
+	//let penelope do something
 	if (!m_penelope->isDead()) {
 		m_penelope->doSomething();
 	}
@@ -156,6 +161,8 @@ int StudentWorld::move()
 		decLives();
 		return GWSTATUS_PLAYER_DIED;
 	}
+
+	//let every actor in the list of actors do something
 	list<Actor*>::iterator it;
 	it = m_actors.begin();
 	while (it != m_actors.end()) {
@@ -168,12 +175,12 @@ int StudentWorld::move()
 			m_completeLevel = false;
 			return GWSTATUS_FINISHED_LEVEL;
 		}
+		//check for any actors who died in the current tick
 		checkDead(it);
 		if (it != m_actors.end()) {
 			it++;
 		}
 	}
-	//checkDead();
 	return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -200,14 +207,13 @@ void StudentWorld::infectPenelope()
 	m_penelope->infect();
 }
 
+//ensures no object moves into another object that has collisions's bounding box
 bool StudentWorld::checkCollisions(double x, double y, Actor* curr) const
 {
 	list<Actor*>::const_iterator it = m_actors.begin();
-	
 	while (it != m_actors.end())
 	{
 		if (((*it)->hasCollision() == false) || ((*it) == curr)){
-			//cerr << "doesnt" << endl;
 			it++;
 			continue;
 		}
@@ -222,6 +228,7 @@ bool StudentWorld::checkCollisions(double x, double y, Actor* curr) const
 	return false;
 }
 
+//handles specific collisions with penelope
 bool StudentWorld::checkCollisionWithPenelope(double x, double y) const
 {
 	double upperBound = m_penelope->getY() + SPRITE_HEIGHT;
@@ -233,6 +240,7 @@ bool StudentWorld::checkCollisionWithPenelope(double x, double y) const
 	return false;
 }
 
+//handles behavior when two objects overlap
 bool StudentWorld::checkOverlap(double x, double y, char type) {
 	list<Actor*>::iterator it = m_actors.begin();
 	double hDist = 0;
@@ -275,14 +283,16 @@ bool StudentWorld::checkOverlap(double x, double y, char type) {
 				}
 				break;
 			default:
-				return true;
+				break;
 			}
+			return true;
 		}
 		it++;
 	}
 	return false;
 }
 
+//handles behavior when overlapping with penelope
 bool StudentWorld::checkOverlapWithPenelope(double x, double y) const
 {
 	double pDist = distanceToPenelope(x, y);
@@ -301,9 +311,10 @@ void StudentWorld::escape(list<Actor*>::iterator& escapee)
 	(*escapee)->setDead();
 }
 
-bool StudentWorld::findNearestCitizen(double x, double y, Actor* origin) 
+//finds nearest infectable actor to origin actor, sets origin actor's direction to the direction that gets them closer to nearest infectable actor
+bool StudentWorld::findNearestInfectable(double x, double y, Actor* origin) 
 {
-	double mDist = 6400;
+	double mDist = TARGET_RANGE + 1;
 	double actorX = 0;
 	double actorY = 0;
 	double hDist = 0;
@@ -334,6 +345,7 @@ bool StudentWorld::findNearestCitizen(double x, double y, Actor* origin)
 	return true;
 }
 
+//finds nearest zombie to actor at (x, y) and returns the distance to nearest zombie
 double StudentWorld::findNearestZombie(double x, double y) 
 {
 	double mDist = 6401;
@@ -359,6 +371,8 @@ double StudentWorld::findNearestZombie(double x, double y)
 	}
 	return mDist;
 }
+
+//sets origin actor to the direction that would take it closer to penelope if penelope is closer than the distance passed in
 bool StudentWorld::targetPenelope(double x, double y, double currDist, Actor* origin) 
 {
 	double pDist = distanceToPenelope(x, y);
@@ -369,9 +383,9 @@ bool StudentWorld::targetPenelope(double x, double y, double currDist, Actor* or
 	return false;
 }
 
+//determines direction that gets origin actor closer to actor at (actorX, actorY) and sets origin's direction to that direction
 void StudentWorld::setClosestDirection(double actorX, double actorY, Actor* origin)
 {
-	//cerr << "setting direction" << endl;
 	double originX = origin->getX();
 	double originY = origin->getY();
 	if (originX == actorX) {
@@ -406,6 +420,7 @@ void StudentWorld::setClosestDirection(double actorX, double actorY, Actor* orig
 	return;
 }
 
+//calculate distance from actor at (x, y) to penelope
 double StudentWorld::distanceToPenelope(double x, double y) const
 {
 	double pxDist = (m_penelope->getX() - x) * (m_penelope->getX() - x);
@@ -432,6 +447,7 @@ void StudentWorld::pickupGoodie(char goodie)
 	playSound(SOUND_GOT_GOODIE);
 }
 
+//handles the behavior of a landmine exploding
 void StudentWorld::explode(double x, double y)
 {
 	cerr << "explosion" << endl;
@@ -470,10 +486,9 @@ bool StudentWorld::createFlame(double x, double y, int dir)
 	return true;
 }
 
+//returns true if successfuly created vomit at specified x and y
 bool StudentWorld::createVomit(double x, double y, int dir)
 {
-	if ((randInt(1, 3) != 1))
-		return false;
 	if (checkOverlap(x, y, 'v'))
 		return false;
 	cerr << "Creating Vomit" << endl;
@@ -482,6 +497,7 @@ bool StudentWorld::createVomit(double x, double y, int dir)
 	return true;
 }
 
+//create a zombie as a result of a citizen dying to a zombie's vomit
 void StudentWorld::createZombie(double x, double y, int dir)
 {
 	cerr << "Zombie Born" << endl;
@@ -495,12 +511,14 @@ void StudentWorld::createZombie(double x, double y, int dir)
 	playSound(SOUND_ZOMBIE_BORN);
 }
 
+//create a landmine at specified x and y
 void StudentWorld::deployMine(double x, double y)
 {
 	Actor* landmine = new Landmine(this, x, y);
 	m_actors.push_back(landmine);
 }
 
+//shoot flames in front of penelope if nothing blocks their creation
 void StudentWorld::shootFlamethrower(int dir)
 {
 	double playerX = m_penelope->getX();
