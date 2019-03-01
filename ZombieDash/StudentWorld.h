@@ -31,7 +31,7 @@ public:
 	void	escape(std::list<Actor*>::iterator& escapee);
 	
 	//functions used for 'AI,' targeting nearest actors (used for citizen and smart zombies)
-	bool	findNearestCitizen(double x, double y, Actor* origin);
+	bool	findNearestInfectable(double x, double y, Actor* origin);
 	double	findNearestZombie(double x, double y);
 	bool	targetPenelope(double x, double y, double currDist, Actor* origin);
 	void	setClosestDirection(double actorX, double actorY, Actor* origin);
@@ -73,7 +73,6 @@ private:
 	Penelope*			m_penelope;
 	std::list<Actor*>	m_actors;
 	int					m_alive;
-	bool				m_victory;
 	bool				m_completeLevel;
 
 	void checkDead(std::list<Actor*>::iterator& currIt);

@@ -17,7 +17,8 @@ public:
 
 	virtual void doSomething() = 0;
 	virtual void kill() = 0;
-	virtual void infectInfectable() = 0;
+
+	virtual void infectInfectable() { return; }
 
 	virtual bool hasCollision()
 	{
@@ -96,13 +97,6 @@ public:
 	{
 		return true;
 	}
-
-	virtual void infectInfectable()
-	{
-		return;
-	}
-
-private:
 
 };
 
@@ -203,6 +197,11 @@ public:
 		m_landmineCount += 2;
 	}
 
+private:
+	int	m_vaccineCount;
+	int	m_gasCount;
+	int m_landmineCount;
+
 	void useVaccine()
 	{
 		if (m_vaccineCount > 0) {
@@ -210,13 +209,6 @@ public:
 			m_vaccineCount--;
 		}
 	}
-
-
-
-private:
-	int	m_vaccineCount;
-	int	m_gasCount;
-	int m_landmineCount;
 };
 
 class Citizen : public InfectablePlayer
@@ -231,6 +223,9 @@ public:
 	virtual void doSomething();
 	virtual void infectInfectable();
 
+private:
+	bool m_isParalyzed;
+
 	bool isParalyzed()
 	{
 		return m_isParalyzed;
@@ -240,9 +235,6 @@ public:
 	{
 		m_isParalyzed = !m_isParalyzed;
 	}
-
-private:
-	bool m_isParalyzed;
 };
 
 //*/
@@ -262,16 +254,6 @@ public:
 	virtual void changeDirection();
 
 	bool spitVomit();
-
-	bool isParalyzed()
-	{
-		return m_isParalyzed;
-	}
-
-	void changeState()
-	{
-		m_isParalyzed = !m_isParalyzed;
-	}
 
 	void setScore(int score)
 	{
@@ -293,15 +275,20 @@ public:
 		m_movePlan = randInt(3, 10);
 	}
 
-	virtual void infectInfectable()
-	{
-		return;
-	}
-
 private:
 	int		m_movePlan;
 	bool	m_isParalyzed;
 	int		m_score;
+
+	bool isParalyzed()
+	{
+		return m_isParalyzed;
+	}
+
+	void changeState()
+	{
+		m_isParalyzed = !m_isParalyzed;
+	}
 };
 
 class DumbZombie : public Zombie
@@ -331,7 +318,6 @@ public:
 	}
 	virtual ~SmartZombie();
 
-	virtual void doSomething();
 	virtual void changeDirection();
 };
 
@@ -350,11 +336,6 @@ public:
 	virtual bool blockFlames()
 	{
 		return true;
-	}
-
-	virtual void infectInfectable()
-	{
-		return;
 	}
 };
 
@@ -421,11 +402,6 @@ public:
 	virtual void doSomething();
 	virtual void kill();
 
-	virtual bool isDamageable()
-	{
-		return true;
-	}
-
 	void decSafety()
 	{
 		m_safetyTicks--;
@@ -446,6 +422,11 @@ public:
 		return m_safetyTicks;
 	}
 
+	virtual bool isDamageable()
+	{
+		return true;
+	}
+
 private:
 	bool	m_isActive;
 	int		m_safetyTicks;
@@ -460,36 +441,15 @@ private:
 class Goodie : public Actor
 {
 public:
-	Goodie(StudentWorld* world, int imageID, double startX, double startY) : Actor(world, imageID, startX, startY, 0, 1) 
-	{
-		m_iTicks = 2;
-	}
+	Goodie(StudentWorld* world, int imageID, double startX, double startY) : Actor(world, imageID, startX, startY, 0, 1) {}
 	virtual ~Goodie();
 	virtual void doSomething();
 	virtual void kill();
 
 	virtual bool isDamageable()
 	{
-		return m_iTicks == 0;
+		return true;
 	}
-
-	int get_iTicks()
-	{
-		return m_iTicks;
-	}
-
-	void dec_iTicks()
-	{
-		m_iTicks--;
-	}
-
-	virtual void infectInfectable()
-	{
-		return;
-	}
-
-private:
-	int m_iTicks;
 };
 
 class VaccineGoodie : public Goodie
@@ -535,11 +495,6 @@ public:
 	virtual ~Projectile();
 	virtual void doSomething();
 
-	virtual bool isDamgeable()
-	{
-		return false;
-	}
-
 	virtual void kill();
 	int getLife()
 	{
@@ -549,11 +504,6 @@ public:
 	void decLife()
 	{
 		m_lifespan--;
-	}
-
-	virtual void infectInfectable()
-	{
-		return;
 	}
 
 private:

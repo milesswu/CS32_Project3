@@ -18,7 +18,6 @@ StudentWorld::StudentWorld(string assetPath)
 {
 	m_penelope = nullptr;
 	m_alive = 0;
-	m_victory = false;
 	m_completeLevel = false;
 }
 
@@ -302,7 +301,7 @@ void StudentWorld::escape(list<Actor*>::iterator& escapee)
 	(*escapee)->setDead();
 }
 
-bool StudentWorld::findNearestCitizen(double x, double y, Actor* origin) 
+bool StudentWorld::findNearestInfectable(double x, double y, Actor* origin) 
 {
 	double mDist = 6400;
 	double actorX = 0;

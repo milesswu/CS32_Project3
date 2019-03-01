@@ -146,6 +146,8 @@ Citizen::~Citizen()
 
 void Citizen::doSomething()
 {
+	if (isDead())
+		return;
 	InfectablePlayer::doSomething();
 	if (isParalyzed()) {
 		changeState();
@@ -156,11 +158,17 @@ void Citizen::doSomething()
 	chooseUp = chooseDown = chooseLeft = chooseRight = 0;
 	double maxDist = 0;
 	Direction newDir = right;
+
+	//Check collisions with actors in all directions, if no collision detected, compute which direction would bring citizen farthest from closest zombie
 	if (!getWorld()->checkCollisions(getX(), getY() + 2, this) && !getWorld()->checkCollisionWithPenelope(getX(), getY() +21)) {
 		chooseUp = getWorld()->findNearestZombie(getX(), getY() + 2);
 		if (chooseUp > maxDist) {
 			maxDist = chooseUp;
 			newDir = up;
+		}
+		else if (chooseUp == maxDist)
+		{
+			newDir = -1;
 		}
 	}
 	if (!getWorld()->checkCollisions(getX(), getY() - 2, this) && !getWorld()->checkCollisionWithPenelope(getX(), getY() - 2)) {
@@ -169,12 +177,20 @@ void Citizen::doSomething()
 			maxDist = chooseDown;
 			newDir = down;
 		}
+		else if (chooseDown == maxDist)
+		{
+			newDir = -1;
+		}
 	}
 	if (!getWorld()->checkCollisions(getX() - 2, getY(), this) && !getWorld()->checkCollisionWithPenelope(getX() - 2, getY())) {
 		chooseLeft = getWorld()->findNearestZombie(getX() - 2, getY());
 		if (chooseLeft > maxDist) {
 			maxDist = chooseLeft;
 			newDir = left;
+		}
+		else if (chooseLeft == maxDist)
+		{
+			newDir = -1;
 		}
 	}
 	if (!getWorld()->checkCollisions(getX() + 2, getY(), this) && !getWorld()->checkCollisionWithPenelope(getX() + 2, getY())) {
@@ -183,7 +199,13 @@ void Citizen::doSomething()
 			maxDist = chooseRight;
 			newDir = right;
 		}
+		else if (chooseRight == maxDist)
+		{
+			newDir = -1;
+		}
 	}
+
+	//target penelope if she is closer than any zombie
 	double pDist = getWorld()->distanceToPenelope(getX(), getY());
 	if (getWorld()->targetPenelope(getX(), getY(), maxDist, this)) {
 		newDir = getDirection();
@@ -236,6 +258,8 @@ Zombie::~Zombie()
 
 void Zombie::doSomething()
 {
+	if (isDead())
+		return;
 	if (isParalyzed()) {
 		changeState();
 		return;
@@ -376,14 +400,9 @@ SmartZombie::~SmartZombie()
 	cerr << "Destroying a Smart Zombie" << endl;
 }
 
-void SmartZombie::doSomething()
-{
-	Zombie::doSomething();
-}
-
 void SmartZombie::changeDirection()
 {
-	if (getWorld()->findNearestCitizen(getX(), getY(), this)) {
+	if (getWorld()->findNearestInfectable(getX(), getY(), this)) {
 		return;
 	}
 	Zombie::changeDirection();
@@ -499,9 +518,6 @@ void VaccineGoodie::doSomething()
 		getWorld()->pickupGoodie('v');
 		Goodie::doSomething();
 	}
-
-	if (get_iTicks() != 0)
-		dec_iTicks();
 }
 
 GasCanGoodie::~GasCanGoodie()
@@ -515,9 +531,6 @@ void GasCanGoodie::doSomething()
 		getWorld()->pickupGoodie('g');
 		Goodie::doSomething();
 	}
-
-	if (get_iTicks() != 0)
-		dec_iTicks();
 }
 
 LandmineGoodie::~LandmineGoodie()
@@ -531,9 +544,6 @@ void LandmineGoodie::doSomething()
 		getWorld()->pickupGoodie('l');
 		Goodie::doSomething();
 	}
-
-	if (get_iTicks() != 0)
-		dec_iTicks();
 }
 
 /**********************************************************************************************************************************************************
