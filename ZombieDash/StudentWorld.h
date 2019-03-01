@@ -68,7 +68,6 @@ public:
 	}
 
 private:
-	const double		COLLISION_DISTANCE = pow(SPRITE_WIDTH, 2) + pow(SPRITE_HEIGHT, 2);
 	const double		OVERLAP_DISTANCE = 100;
 	const double		TARGET_RANGE = 6400;
 	Penelope*			m_penelope;

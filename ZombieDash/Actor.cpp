@@ -54,14 +54,6 @@ void InfectablePlayer::doSomething()
 		incInfection();
 }
 
-void InfectablePlayer::infect()
-{
-	if (m_isInfected == false) {
-		m_isInfected = true;
-		getWorld()->playSound(SOUND_CITIZEN_INFECTED);
-	}
-}
-
 /**********************************************************************************************************************************************************
 																		PENELOPE MEMBER FUNCTIONS
 ***********************************************************************************************************************************************************
@@ -216,6 +208,13 @@ void Citizen::doSomething()
 	}
 }
 
+void Citizen::infectInfectable()
+{
+	if (isInfected() == false)
+		getWorld()->playSound(SOUND_CITIZEN_INFECTED);
+	InfectablePlayer::infectInfectable();
+}
+
 void Citizen::kill()
 {
 	getWorld()->increaseScore(-1000);
@@ -243,6 +242,7 @@ void Zombie::doSomething()
 	}
 	changeState();
 	if (spitVomit()) {
+		getWorld()->playSound(SOUND_ZOMBIE_VOMIT);
 		return;
 	}
 	if (moves() == 0) {

@@ -116,11 +116,11 @@ public:
 	}
 	virtual ~InfectablePlayer();
 	virtual void doSomething();
-	virtual void infect();
 
 	virtual void infectInfectable()
 	{
-		m_isInfected = true;
+		if (m_isInfected == false)
+			m_isInfected = true;
 	}
 
 	virtual bool isInfectable()
@@ -228,8 +228,8 @@ public:
 	}
 	virtual ~Citizen();
 	virtual void kill();
-
 	virtual void doSomething();
+	virtual void infectInfectable();
 
 	bool isParalyzed()
 	{
