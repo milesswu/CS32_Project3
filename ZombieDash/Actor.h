@@ -490,7 +490,8 @@ class Projectile : public Actor
 public:
 	Projectile(StudentWorld* world, int imageID, double startX, double startY, Direction dir) : Actor(world, imageID, startX, startY, dir, 0) 
 	{
-		m_lifespan = 2;
+		m_lifespan = 3;
+		count = 0;
 	}
 	virtual ~Projectile();
 	virtual void doSomething();
@@ -508,6 +509,7 @@ public:
 
 private:
 	int m_lifespan;
+	int count;
 };
 
 class Vomit : public Projectile	
@@ -522,11 +524,12 @@ public:
 class Flame : public Projectile
 {
 public:
-	Flame(StudentWorld* world, double startX, double startY, Direction dir) : Projectile(world, IID_FLAME, startX, startY, dir) {}
+	Flame(StudentWorld* world, double startX, double startY, Direction dir) : Projectile(world, IID_FLAME, startX, startY, dir) { count = 0; }
 	virtual ~Flame();
 
 	virtual void doSomething();
-
+private:
+	int count;
 };
 
 #endif // ACTOR_H_

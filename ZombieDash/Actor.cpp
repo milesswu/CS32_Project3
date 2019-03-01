@@ -558,7 +558,7 @@ Projectile::~Projectile()
 
 void Projectile::doSomething()
 {
-	if (getLife() == 0) {
+	if (getLife() <= 0) {
 		kill();
 		return;
 	}

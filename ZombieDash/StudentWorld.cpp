@@ -30,7 +30,7 @@ StudentWorld::~StudentWorld()
 int StudentWorld::init()
 {
 	Level lev(assetPath());
-	int levNum = getLevel(); //TODO
+	int levNum = getLevel(); 
 	ostringstream oss;
 	oss.fill('0');
 	oss << "level" << setw(2) << levNum << ".txt";
@@ -173,7 +173,6 @@ int StudentWorld::move()
 			it++;
 		}
 	}
-	//checkDead();
 	return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -207,7 +206,6 @@ bool StudentWorld::checkCollisions(double x, double y, Actor* curr) const
 	while (it != m_actors.end())
 	{
 		if (((*it)->hasCollision() == false) || ((*it) == curr)){
-			//cerr << "doesnt" << endl;
 			it++;
 			continue;
 		}
@@ -362,7 +360,7 @@ double StudentWorld::findNearestZombie(double x, double y)
 bool StudentWorld::targetPenelope(double x, double y, double currDist, Actor* origin) 
 {
 	double pDist = distanceToPenelope(x, y);
-	if (pDist <= TARGET_RANGE && pDist <= currDist) {
+	if (pDist <= TARGET_RANGE && pDist < currDist) {
 			setClosestDirection(m_penelope->getX(), m_penelope->getY(), origin);
 		return true;
 	}
@@ -371,7 +369,6 @@ bool StudentWorld::targetPenelope(double x, double y, double currDist, Actor* or
 
 void StudentWorld::setClosestDirection(double actorX, double actorY, Actor* origin)
 {
-	//cerr << "setting direction" << endl;
 	double originX = origin->getX();
 	double originY = origin->getY();
 	if (originX == actorX) {
@@ -470,6 +467,7 @@ bool StudentWorld::createFlame(double x, double y, int dir)
 	return true;
 }
 
+//returns true if successfully created vomit at specified coordinates
 bool StudentWorld::createVomit(double x, double y, int dir)
 {
 	if ((randInt(1, 3) != 1))
@@ -538,10 +536,13 @@ void StudentWorld::checkDead(list<Actor*>::iterator& currIt) {
 	while (it != m_actors.end()) {
 		if ((*it)->isDead()) {
 			delete (*it);
-			if (it == currIt)
+			if (it == currIt) {
 				it = currIt = m_actors.erase(it);
-			else
+				currIt--;
+			}
+			else {
 				it = m_actors.erase(it);
+			}
 		}
 		else {
 			it++;
